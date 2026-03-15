@@ -1,0 +1,20 @@
+src/app/admin/discounts/new/page.tsx(10,3): error TS2305: Module '"@chakra-ui/react"' has no exported member 'Radio'.
+src/app/admin/discounts/new/page.tsx(41,11): error TS2322: Type '{ children: Element[]; title: string; subtitle: string; backUrl: string; }' is not assignable to type 'IntrinsicAttributes & PageHeaderProps'.
+  Property 'backUrl' does not exist on type 'IntrinsicAttributes & PageHeaderProps'.
+src/app/admin/discounts/new/page.tsx(43,44): error TS2322: Type '{ children: string; variant: "secondary"; as: string; href: string; }' is not assignable to type 'IntrinsicAttributes & AdminButtonProps'.
+  Property 'as' does not exist on type 'IntrinsicAttributes & AdminButtonProps'.
+src/app/admin/discounts/new/page.tsx(52,13): error TS2322: Type '{ children: Element; label: string; helpText: string; }' is not assignable to type 'IntrinsicAttributes & FormFieldProps'.
+  Property 'helpText' does not exist on type 'IntrinsicAttributes & FormFieldProps'.
+src/app/admin/discounts/new/page.tsx(57,33): error TS2339: Property 'style' does not exist on type '{ size: "md"; borderRadius: string; borderColor: "#e2e8f0"; fontSize: string; px: string; h: string; bg: string; _focus: { borderColor: "#10b981"; boxShadow: string; }; _placeholder: { color: string; }; }'.
+src/app/admin/discounts/new/page.tsx(65,37): error TS2339: Property 'style' does not exist on type '{ size: "md"; borderRadius: string; borderColor: "#e2e8f0"; fontSize: string; px: string; h: string; bg: string; _focus: { borderColor: "#10b981"; boxShadow: string; }; _placeholder: { color: string; }; }'.
+src/app/admin/discounts/new/page.tsx(80,37): error TS2339: Property 'style' does not exist on type '{ size: "md"; borderRadius: string; borderColor: "#e2e8f0"; fontSize: string; px: string; h: string; bg: string; _focus: { borderColor: "#10b981"; boxShadow: string; }; _placeholder: { color: string; }; }'.
+src/app/admin/discounts/new/page.tsx(89,11): error TS2322: Type '{ children: Element; title: string; description: string; }' is not assignable to type 'IntrinsicAttributes & SectionCardProps'.
+  Property 'description' does not exist on type 'IntrinsicAttributes & SectionCardProps'.
+src/app/admin/discounts/new/page.tsx(93,48): error TS2345: Argument of type 'string | null' is not assignable to parameter of type 'SetStateAction<string>'.
+  Type 'null' is not assignable to type 'SetStateAction<string>'.
+src/app/admin/discounts/new/page.tsx(140,20): error TS2741: Property 'label' is missing in type '{ children: Element; }' but required in type 'FormFieldProps'.
+src/app/admin/discounts/new/page.tsx(144,41): error TS2339: Property 'style' does not exist on type '{ size: "md"; borderRadius: string; borderColor: "#e2e8f0"; fontSize: string; px: string; h: string; bg: string; _focus: { borderColor: "#10b981"; boxShadow: string; }; _placeholder: { color: string; }; }'.
+src/app/admin/discounts/new/page.tsx(174,54): error TS2339: Property 'style' does not exist on type '{ size: "md"; borderRadius: string; borderColor: "#e2e8f0"; fontSize: string; px: string; h: string; bg: string; _focus: { borderColor: "#10b981"; boxShadow: string; }; _placeholder: { color: string; }; }'.
+src/app/admin/discounts/new/page.tsx(179,54): error TS2339: Property 'style' does not exist on type '{ size: "md"; borderRadius: string; borderColor: "#e2e8f0"; fontSize: string; px: string; h: string; bg: string; _focus: { borderColor: "#10b981"; boxShadow: string; }; _placeholder: { color: string; }; }'.
+src/app/admin/discounts/new/page.tsx(187,46): error TS2322: Type '{ children: string; variant: "secondary"; as: string; href: string; }' is not assignable to type 'IntrinsicAttributes & AdminButtonProps'.
+  Property 'as' does not exist on type 'IntrinsicAttributes & AdminButtonProps'.

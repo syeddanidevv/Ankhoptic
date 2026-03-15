@@ -1,0 +1,390 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+
+// ─────────────────────────────────────────────────────
+//  ADMIN
+// ─────────────────────────────────────────────────────
+model AdminUser {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  name      String
+  password  String
+  role      AdminRole @default(STAFF)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("admin_users")
+}
+
+enum AdminRole {
+  OWNER
+  ADMIN
+  STAFF
+}
+
+// ─────────────────────────────────────────────────────
+//  CUSTOMER
+// ─────────────────────────────────────────────────────
+model Customer {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String
+  phone         String?
+  password      String?
+  emailVerified DateTime?
+  totalSpent    Float     @default(0)
+  ordersCount   Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  orders    Order[]
+  addresses Address[]
+  reviews   Review[]
+  cart      Cart?
+
+  @@map("customers")
+}
+
+// ─────────────────────────────────────────────────────
+//  CATEGORY  (hierarchical — parent/child)
+// ─────────────────────────────────────────────────────
+model Category {
+  id       String @id @default(cuid())
+  name     String
+  slug     String @unique
+  image    String?  @db.Text
+  position Int    @default(0)
+
+  parentId String?
+  parent   Category?  @relation("CategoryChildren", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryChildren")
+
+  brandId  String?
+  brand    Brand?  @relation(fields: [brandId], references: [id])
+
+  products Product[]
+  discounts Discount[] @relation("CategoryDiscounts")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("categories")
+}
+
+// ─────────────────────────────────────────────────────
+//  BRAND
+// ─────────────────────────────────────────────────────
+model Brand {
+  id         String     @id @default(cuid())
+  name       String
+  slug       String     @unique
+  logo       String?    @db.Text
+  products   Product[]
+  categories Category[]
+  discounts  Discount[] @relation("BrandDiscounts")
+
+  createdAt DateTime @default(now())
+
+  @@map("brands")
+}
+
+// ─────────────────────────────────────────────────────
+//  PRODUCT
+// ─────────────────────────────────────────────────────
+model Product {
+  id              String        @id @default(cuid())
+  title           String
+  slug            String        @unique
+  description     String?       @db.Text
+  price           Float
+  comparePrice    Float?
+  discountPercent Float         @default(0)
+  color           String?       // e.g. "BLUE", "BROWN" — configurable
+  disposability   String        @default("ONE_DAY") // configurable
+  inStock         Boolean       @default(true)
+  stockCount      Int           @default(0)
+  images          Json          @default("[]")
+  status          ProductStatus @default(DRAFT)
+  featured        Boolean       @default(false)
+
+  brandId    String?
+  brand      Brand?    @relation(fields: [brandId], references: [id])
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id])
+
+  powerOptions ProductPowerOption[]
+  orderItems   OrderItem[]
+  cartItems    CartItem[]
+  reviews      Review[]
+  discounts    Discount[]           @relation("ProductDiscounts")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("products")
+}
+
+// LensColor and Modality are now dynamic (stored in SiteSetting)
+
+enum ProductStatus {
+  ACTIVE
+  DRAFT
+  ARCHIVED
+}
+
+// ─────────────────────────────────────────────────────
+//  POWER OPTIONS  (per-product)
+// ─────────────────────────────────────────────────────
+model ProductPowerOption {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  value     String  // "-1.00", "0.00"
+  label     String  // "0.00 Plain (Normal Eye)"
+  position  Int     @default(0)
+
+  @@map("product_power_options")
+}
+
+
+//  AFTERCARE ADD-ONS
+// ─────────────────────────────────────────────────────
+model AftercareAddon {
+  id          String  @id @default(cuid())
+  name        String  // "Starter Kit"
+  extraCharge Float   // amount added to total (280, 400)
+  retailPrice Float   // shown price (500, 750)
+  description String?
+  position    Int     @default(0)
+  active      Boolean @default(true)
+
+  @@map("aftercare_addons")
+}
+
+// ─────────────────────────────────────────────────────
+//  DISCOUNT / COUPON
+// ─────────────────────────────────────────────────────
+model Discount {
+  id              String       @id @default(cuid())
+  code            String?      @unique  // "SAVE10", "EID25" (optional for automatic discounts)
+  title           String
+  type            DiscountType // PERCENTAGE | FIXED_AMOUNT | FREE_SHIPPING
+  value           Float        // 10 = 10%, or 200 = Rs200 off
+  minOrderAmount  Float?       // minimum cart total to apply
+  maxUsage        Int?         // total uses allowed (null = unlimited)
+  usedCount       Int          @default(0)
+  perCustomerMax  Int?         // max per customer (null = unlimited)
+  startsAt        DateTime?
+  endsAt          DateTime?
+  active          Boolean      @default(true)
+  isAutomatic     Boolean      @default(false) // If true, automatically applies without code
+  appliesToAll    Boolean      @default(true)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  orders          Order[]
+  
+  // Relations for specific discount targeting
+  categories      Category[]   @relation("CategoryDiscounts")
+  products        Product[]    @relation("ProductDiscounts")
+  brands          Brand[]      @relation("BrandDiscounts")
+
+  @@map("discounts")
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED_AMOUNT
+  FREE_SHIPPING
+}
+
+// ─────────────────────────────────────────────────────
+//  ORDER
+// ─────────────────────────────────────────────────────
+model Order {
+  id                String        @id @default(cuid())
+  orderNumber       Int           @unique @default(autoincrement())
+  customerId        String?
+  customer          Customer?     @relation(fields: [customerId], references: [id])
+
+  // Guest checkout
+  guestName         String?
+  guestEmail        String?
+  guestPhone        String?
+
+  status            OrderStatus   @default(PENDING)
+  paymentStatus     PaymentStatus @default(UNPAID)
+  paymentMethod     PaymentMethod @default(COD)
+  fulfillmentStatus FulfillStatus @default(UNFULFILLED)
+
+  subtotal          Float
+  shippingCost      Float         @default(0)
+  discountAmount    Float         @default(0)
+  total             Float
+
+  discountId        String?
+  discount          Discount?     @relation(fields: [discountId], references: [id])
+  discountCode      String?
+
+  shippingAddress   Json
+  notes             String?       @db.Text
+  trackingNumber    String?
+
+  items             OrderItem[]
+
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  @@map("orders")
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  UNPAID
+  PAID
+  PARTIALLY_PAID
+  REFUNDED
+  COD_PENDING
+}
+
+enum PaymentMethod {
+  COD
+  EASYPAISA
+  JAZZCASH
+  CARD
+  BANK_TRANSFER
+}
+
+enum FulfillStatus {
+  UNFULFILLED
+  PARTIALLY_FULFILLED
+  FULFILLED
+  RETURNED
+  RESTOCKED
+}
+
+// ─────────────────────────────────────────────────────
+//  ORDER ITEMS
+// ─────────────────────────────────────────────────────
+model OrderItem {
+  id              String    @id @default(cuid())
+  orderId         String
+  order           Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId       String?
+  product         Product?  @relation(fields: [productId], references: [id])
+
+  productTitle    String
+  productImage    String?
+  lensType        LensType  @default(PLAIN)
+  rightEyePower   String?
+  leftEyePower    String?
+  prescriptionUrl String?
+  aftercareName   String?
+  aftercarePrice  Float     @default(0)
+  qty             Int       @default(1)
+  unitPrice       Float
+  total           Float
+
+  @@map("order_items")
+}
+
+enum LensType {
+  PLAIN
+  EYESIGHT
+}
+
+// ─────────────────────────────────────────────────────
+//  CART
+// ─────────────────────────────────────────────────────
+model Cart {
+  id         String     @id @default(cuid())
+  customerId String?    @unique
+  customer   Customer?  @relation(fields: [customerId], references: [id])
+  sessionId  String?    @unique
+  items      CartItem[]
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  @@map("carts")
+}
+
+model CartItem {
+  id             String   @id @default(cuid())
+  cartId         String
+  cart           Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productId      String
+  product        Product  @relation(fields: [productId], references: [id])
+  lensType       LensType @default(PLAIN)
+  rightEyePower  String?
+  leftEyePower   String?
+  aftercareName  String?
+  aftercarePrice Float    @default(0)
+  qty            Int      @default(1)
+  createdAt      DateTime @default(now())
+
+  @@map("cart_items")
+}
+
+// ─────────────────────────────────────────────────────
+//  ADDRESS
+// ─────────────────────────────────────────────────────
+model Address {
+  id         String   @id @default(cuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+  name       String
+  phone      String
+  line1      String
+  line2      String?
+  city       String
+  province   String
+  isDefault  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@map("addresses")
+}
+
+// ─────────────────────────────────────────────────────
+//  REVIEW
+// ─────────────────────────────────────────────────────
+model Review {
+  id         String    @id @default(cuid())
+  productId  String
+  product    Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id])
+  name       String
+  rating     Int       // 1–5
+  comment    String?   @db.Text
+  approved   Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+
+  @@map("reviews")
+}
+
+// ─────────────────────────────────────────────────────
+//  STORE SETTINGS
+// ─────────────────────────────────────────────────────
+model StoreSetting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String @db.Text
+
+  @@map("store_settings")
+}

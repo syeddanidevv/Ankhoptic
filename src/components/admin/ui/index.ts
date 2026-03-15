@@ -1,0 +1,22 @@
+// Barrel export — import everything from "@/components/admin/ui"
+export { T, inputProps, textareaProps } from "./tokens";
+export { StatusBadge } from "./StatusBadge";
+export { StatCard } from "./StatCard";
+export { PageHeader } from "./PageHeader";
+export { TabBar } from "./TabBar";
+export { FilterBar } from "./FilterBar";
+export { BulkBar } from "./BulkBar";
+export { TableShell, THead, TR, TD, EmptyRow } from "./TableShell";
+export { TodayStrip } from "./TodayStrip";
+export { SectionCard } from "./SectionCard";
+export { FormField } from "./FormField";
+export { FieldError } from "./FieldError";
+export { AdminButton } from "./AdminButton";
+export { InputField, INPUT_ICONS } from "./InputField";
+export type { NamedIcon } from "./InputField";
+export { SelectField } from "./SelectField";
+export { toaster } from "./toaster";
+export { AdminModal } from "./AdminModal";
+export { AdminLoader } from "./AdminLoader";
+export { ProductImages } from "./ProductImages";
+export { ConfirmDialog } from "./ConfirmDialog";
