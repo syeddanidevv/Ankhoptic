@@ -10,7 +10,6 @@ import {
   VStack,
   Textarea,
   Switch,
-  NativeSelect,
 } from "@chakra-ui/react";
 import NextLink from "next/link";
 import {
@@ -20,6 +19,7 @@ import {
   FormField,
   AdminButton,
   InputField,
+  SelectField,
   AdminLoader,
 } from "@/components/admin/ui";
 
@@ -58,19 +58,12 @@ const LENS_COLORS = [
   "Other",
 ];
 
-const selectStyle = {
-  size: "md" as const,
-  borderRadius: "8px",
-  borderColor: T.border,
-  fontSize: "13.5px",
-  h: "38px",
-  px: "12px",
-  bg: "white",
-  _focus: {
-    borderColor: T.green,
-    boxShadow: "0 0 0 2px rgba(16,185,129,0.12)",
-  },
-};
+const DISPOSABILITY_OPTIONS = [
+  "ONE_DAY",
+  "MONTHLY",
+  "QUARTERLY",
+  "YEARLY",
+];
 
 export default function EditProductPage() {
   const { id } = useParams<{ id: string }>();
@@ -218,7 +211,7 @@ export default function EditProductPage() {
             Products
           </Text>
         </NextLink>
-        <Text fontSize="13px" color="#cbd5e1">
+        <Text fontSize="13px" color={T.placeholder}>
           /
         </Text>
         <Text
@@ -236,8 +229,8 @@ export default function EditProductPage() {
 
       {error && (
         <Box
-          bg="#fff1f2"
-          border="1px solid #fecdd3"
+          bg={T.redBg}
+          border={`1px solid ${T.border}`}
           borderRadius="8px"
           px={4}
           py={3}
@@ -305,7 +298,7 @@ export default function EditProductPage() {
                     borderColor: T.green,
                     boxShadow: "0 0 0 2px rgba(16,185,129,0.12)",
                   }}
-                  _placeholder={{ color: "#cbd5e1" }}
+                  _placeholder={{ color: T.placeholder }}
                 />
               </FormField>
             </SectionCard>
@@ -316,72 +309,47 @@ export default function EditProductPage() {
             >
               <Grid templateColumns="1fr 1fr" gap={4}>
                 <FormField label="Brand">
-                  <NativeSelect.Root size="sm">
-                    <NativeSelect.Field
-                      {...selectStyle}
-                      value={form.brandId}
-                      onChange={(e) => set("brandId", e.target.value)}
-                    >
-                      <option value="">Select brand</option>
-                      {brands.map((b) => (
-                        <option key={b.id} value={b.id}>
-                          {b.name}
-                        </option>
-                      ))}
-                    </NativeSelect.Field>
-                    <NativeSelect.Indicator />
-                  </NativeSelect.Root>
+                  <SelectField
+                    options={[
+                      { value: "", label: "Select brand" },
+                      ...brands.map((b) => ({ value: b.id, label: b.name }))
+                    ]}
+                    value={form.brandId}
+                    onChange={(e) => set("brandId", e.target.value)}
+                    placeholder="Select brand"
+                  />
                 </FormField>
                 <FormField label="Category">
-                  <NativeSelect.Root size="sm">
-                    <NativeSelect.Field
-                      {...selectStyle}
-                      value={form.categoryId}
-                      onChange={(e) => set("categoryId", e.target.value)}
-                    >
-                      <option value="">Select category</option>
-                      {dbCategories
+                  <SelectField
+                    options={[
+                      { value: "", label: "Select category" },
+                      ...(dbCategories
                         .filter((c) => form.brandId ? c.brandId === form.brandId : !c.brandId)
-                        .map((c) => (
-                          <option key={c.id} value={c.id}>
-                            {c.parentId ? `↳ ${c.name}` : c.name}
-                          </option>
-                      ))}
-                    </NativeSelect.Field>
-                    <NativeSelect.Indicator />
-                  </NativeSelect.Root>
+                        .map((c) => ({ value: c.id, label: c.parentId ? `↳ ${c.name}` : c.name })))
+                    ]}
+                    value={form.categoryId}
+                    onChange={(e) => set("categoryId", e.target.value)}
+                    placeholder="Select category"
+                  />
                 </FormField>
                 <FormField label="Color">
-                  <NativeSelect.Root size="sm">
-                    <NativeSelect.Field
-                      {...selectStyle}
-                      value={form.color}
-                      onChange={(e) => set("color", e.target.value)}
-                    >
-                      <option value="">Select color</option>
-                      {LENS_COLORS.map((c) => (
-                        <option key={c} value={c}>
-                          {c}
-                        </option>
-                      ))}
-                    </NativeSelect.Field>
-                    <NativeSelect.Indicator />
-                  </NativeSelect.Root>
+                  <SelectField
+                    options={[
+                      { value: "", label: "Select color" },
+                      ...LENS_COLORS.map((c) => ({ value: c, label: c }))
+                    ]}
+                    value={form.color}
+                    onChange={(e) => set("color", e.target.value)}
+                    placeholder="Select color"
+                  />
                 </FormField>
                 <FormField label="Disposability">
-                  <NativeSelect.Root size="sm">
-                    <NativeSelect.Field
-                      {...selectStyle}
-                      value={form.disposability}
-                      onChange={(e) => set("disposability", e.target.value)}
-                    >
-                      <option value="ONE_DAY">One Day</option>
-                      <option value="MONTHLY">Monthly</option>
-                      <option value="QUARTERLY">Quarterly</option>
-                      <option value="YEARLY">Yearly</option>
-                    </NativeSelect.Field>
-                    <NativeSelect.Indicator />
-                  </NativeSelect.Root>
+                  <SelectField
+                    options={DISPOSABILITY_OPTIONS}
+                    value={form.disposability}
+                    onChange={(e) => set("disposability", e.target.value)}
+                    placeholder="Select disposability"
+                  />
                 </FormField>
 
               </Grid>
@@ -456,18 +424,16 @@ export default function EditProductPage() {
         <GridItem>
           <VStack gap={4} align="stretch">
             <SectionCard title="Status">
-              <NativeSelect.Root size="sm">
-                <NativeSelect.Field
-                  {...selectStyle}
-                  value={form.status}
-                  onChange={(e) => set("status", e.target.value)}
-                >
-                  <option value="DRAFT">Draft</option>
-                  <option value="ACTIVE">Active</option>
-                  <option value="ARCHIVED">Archived</option>
-                </NativeSelect.Field>
-                <NativeSelect.Indicator />
-              </NativeSelect.Root>
+              <SelectField
+                options={[
+                  { value: "DRAFT", label: "Draft" },
+                  { value: "ACTIVE", label: "Active" },
+                  { value: "ARCHIVED", label: "Archived" }
+                ]}
+                value={form.status}
+                onChange={(e) => set("status", e.target.value)}
+                placeholder="Select status"
+              />
             </SectionCard>
 
             <SectionCard title="Pricing">

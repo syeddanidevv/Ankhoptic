@@ -289,7 +289,7 @@ function ProductForm() {
             Products
           </Text>
         </NextLink>
-        <Text fontSize="13px" color="#cbd5e1">/</Text>
+        <Text fontSize="13px" color={T.placeholder}>/</Text>
         <Text fontSize="13px" fontWeight={600} color={T.text}>
           {isEdit ? "Edit product" : "Add product"}
         </Text>
@@ -333,8 +333,8 @@ function ProductForm() {
         </Flex>
         {error && (
           <Box
-            bg="#fff1f2"
-            border="1px solid #fecdd3"
+            bg={T.redBg}
+            border={`1px solid ${T.border}`}
             borderRadius="8px"
             px={3} py={2} mt={2}
           >
@@ -383,7 +383,7 @@ function ProductForm() {
                     borderColor: T.green,
                     boxShadow: "0 0 0 2px rgba(16,185,129,0.12)",
                   }}
-                  _placeholder={{ color: "#cbd5e1" }}
+                  _placeholder={{ color: T.placeholder }}
                 />
               </FormField>
             </SectionCard>

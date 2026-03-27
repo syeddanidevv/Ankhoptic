@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { Box, Text, HStack, Image } from "@chakra-ui/react";
 import { UploadCloud, ImageIcon, X, CheckCircle2, Link2 } from "lucide-react";
@@ -126,16 +126,14 @@ export function ImageUpload({
     xhr.send(fd);
   };
 
-  const onDrop = useCallback(
-    (accepted: File[]) => {
-      if (!accepted[0]) return;
-      uploadOnSelect
-        ? handleImmediate(accepted[0])
-        : handleDeferred(accepted[0]);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [uploadOnSelect],
-  );
+  const onDrop = (accepted: File[]) => {
+    if (!accepted[0]) return;
+    if (uploadOnSelect) {
+      handleImmediate(accepted[0]);
+    } else {
+      handleDeferred(accepted[0]);
+    }
+  };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,

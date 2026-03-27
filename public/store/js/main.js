@@ -150,7 +150,6 @@
       $this.closest(".tf-compare-item").remove();
     });
     $(".tf-mini-cart-remove").on("click", function (e) {
-      console.log('hhh')
       $(this).closest(".tf-mini-cart-item").remove();
     });
 

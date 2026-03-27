@@ -1,10 +1,10 @@
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "mysql"
-  url      = env("DATABASE_URL")
 }
 
 
@@ -214,10 +214,7 @@ model Order {
   customerId        String?
   customer          Customer?     @relation(fields: [customerId], references: [id])
 
-  // Guest checkout
-  guestName         String?
-  guestEmail        String?
-  guestPhone        String?
+  // Guest checkout removed
 
   status            OrderStatus   @default(PENDING)
   paymentStatus     PaymentStatus @default(UNPAID)
@@ -251,6 +248,7 @@ enum OrderStatus {
   PROCESSING
   SHIPPED
   DELIVERED
+  COMPLETED
   CANCELLED
   REFUNDED
 }
@@ -261,6 +259,7 @@ enum PaymentStatus {
   PARTIALLY_PAID
   REFUNDED
   COD_PENDING
+  CANCELLED
 }
 
 enum PaymentMethod {
@@ -275,8 +274,10 @@ enum FulfillStatus {
   UNFULFILLED
   PARTIALLY_FULFILLED
   FULFILLED
+  SHIPPED
   RETURNED
   RESTOCKED
+  CANCELLED
 }
 
 // ─────────────────────────────────────────────────────
@@ -387,4 +388,24 @@ model StoreSetting {
   value String @db.Text
 
   @@map("store_settings")
+}
+
+// ─────────────────────────────────────────────────────
+//  TESTIMONIALS (HOMEPAGE)
+// ─────────────────────────────────────────────────────
+model Testimonial {
+  id          String   @id @default(cuid())
+  rating      Int      @default(5)
+  heading     String
+  text        String   @db.Text
+  authorName  String
+  authorMeta  String?
+  image       String?  @db.LongText
+  productName String?
+  productLink String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("testimonials")
 }

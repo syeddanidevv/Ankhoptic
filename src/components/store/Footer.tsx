@@ -1,18 +1,56 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 import Link from "next/link";
-import Image from "next/image";
 import { useState, useEffect } from "react";
 
 const DEFAULT_LOGO = "/store/images/logo/logo.jpg";
 
 export default function Footer() {
-  const [logo, setLogo] = useState(DEFAULT_LOGO);
+  const [settings, setSettings] = useState<{
+    store_logo: string;
+    store_address: string;
+    store_email: string;
+    store_phone: string;
+  }>({
+    store_logo: DEFAULT_LOGO,
+    store_address: "Ankhoptics Store, Karachi, Pakistan",
+    store_email: "support@ankhoptics.com",
+    store_phone: "+92 300 0000000",
+  });
+
+  const [brands, setBrands] = useState<
+    { id: string; name: string; slug: string }[]
+  >([]);
+  const [colors, setColors] = useState<string[]>([]);
+  const [modalities, setModalities] = useState<
+    { label: string; value: string }[]
+  >([]);
 
   useEffect(() => {
     fetch("/api/settings/store")
       .then((r) => r.json())
-      .then((d) => { if (d.store_logo) setLogo(d.store_logo); })
+      .then((d) => {
+        setSettings((prev) => ({
+          ...prev,
+          store_logo: d.store_logo || prev.store_logo,
+          store_address: d.store_address || prev.store_address,
+          store_email: d.store_email || prev.store_email,
+          store_phone: d.store_phone || prev.store_phone,
+        }));
+      })
+      .catch(() => {});
+
+    fetch("/api/store/brands")
+      .then((r) => r.json())
+      .then(setBrands)
+      .catch(() => {});
+
+    fetch("/api/store/colors-modalities")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.colors) setColors(d.colors);
+        if (d.disposabilities) setModalities(d.disposabilities);
+      })
       .catch(() => {});
   }, []);
 
@@ -27,30 +65,32 @@ export default function Footer() {
                   <div className="footer-logo">
                     <Link href="/">
                       <img
-                        src={logo}
-                        alt="Logo"
-                        style={{ height: "21px", width: "auto" }}
+                        src={settings.store_logo}
+                        alt="Ankhoptics Logo"
+                        style={{ height: "45px", width: "auto" }}
                       />
                     </Link>
                   </div>
                   <ul>
                     <li>
-                      <p>
-                        Address: 1234 Fashion Street, Suite 567, <br /> New
-                        York, NY 10001
-                      </p>
+                      <p>Address: {settings.store_address}</p>
                     </li>
                     <li>
                       <p>
                         Email:{" "}
-                        <Link href="mailto:info@fashionshop.com">
-                          info@fashionshop.com
+                        <Link href={`mailto:${settings.store_email}`}>
+                          {settings.store_email}
                         </Link>
                       </p>
                     </li>
                     <li>
                       <p>
-                        Phone: <Link href="tel:2125551234">(212) 555-1234</Link>
+                        Phone:{" "}
+                        <Link
+                          href={`tel:${settings.store_phone.replace(/\s+/g, "")}`}
+                        >
+                          {settings.store_phone}
+                        </Link>
                       </p>
                     </li>
                   </ul>
@@ -102,130 +142,94 @@ export default function Footer() {
                   </ul>
                 </div>
               </div>
-              <div className="col-xl-3 col-md-6 col-12 footer-col-block">
+              <div className="col-xl-3 col-md-4 col-12 footer-col-block">
                 <div className="footer-heading footer-heading-desktop">
-                  <h6>Help</h6>
+                  <h6>Shop by Brand</h6>
                 </div>
                 <div className="footer-heading footer-heading-moblie">
-                  <h6>Help</h6>
+                  <h6>Shop by Brand</h6>
                 </div>
                 <ul className="footer-menu-list tf-collapse-content">
-                  <li>
-                    <Link href="/privacy-policy" className="footer-menu_item">
-                      Privacy Policy
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/returns" className="footer-menu_item">
-                      {" "}
-                      Returns + Exchanges
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/shipping" className="footer-menu_item">
-                      Shipping
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/terms" className="footer-menu_item">
-                      Terms &amp; Conditions
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/faq" className="footer-menu_item">
-                      FAQ’s
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/compare" className="footer-menu_item">
-                      Compare
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/wishlist" className="footer-menu_item">
-                      My Wishlist
-                    </Link>
-                  </li>
+                  {brands.slice(0, 6).map((brand) => (
+                    <li key={brand.id}>
+                      <Link
+                        href={`/shop?brand=${brand.slug}`}
+                        className="footer-menu_item"
+                      >
+                        {brand.name}
+                      </Link>
+                    </li>
+                  ))}
+                  {brands.length > 6 && (
+                    <li>
+                      <Link
+                        href="/shop"
+                        className="footer-menu_item"
+                        style={{ fontWeight: 600 }}
+                      >
+                        View All Brands →
+                      </Link>
+                    </li>
+                  )}
+                  {brands.length === 0 && (
+                    <li className="footer-menu_item" style={{ color: "#aaa" }}>
+                      Loading...
+                    </li>
+                  )}
                 </ul>
               </div>
-              <div className="col-xl-3 col-md-6 col-12 footer-col-block">
+
+              <div className="col-xl-3 col-md-4 col-12 footer-col-block">
                 <div className="footer-heading footer-heading-desktop">
-                  <h6>About us</h6>
+                  <h6>Shop by Color</h6>
                 </div>
                 <div className="footer-heading footer-heading-moblie">
-                  <h6>About us</h6>
+                  <h6>Shop by Color</h6>
                 </div>
                 <ul className="footer-menu-list tf-collapse-content">
-                  <li>
-                    <Link href="/about" className="footer-menu_item">
-                      Our Story
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/stores" className="footer-menu_item">
-                      Visit Our Store
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/contact" className="footer-menu_item">
-                      Contact Us
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/login" className="footer-menu_item">
-                      Account
-                    </Link>
-                  </li>
+                  {colors.slice(0, 6).map((color) => (
+                    <li key={color}>
+                      <Link
+                        href={`/shop?color=${color}`}
+                        className="footer-menu_item"
+                        style={{ textTransform: "capitalize" }}
+                      >
+                        {color}
+                      </Link>
+                    </li>
+                  ))}
+                  {colors.length === 0 && (
+                    <li className="footer-menu_item" style={{ color: "#aaa" }}>
+                      Loading...
+                    </li>
+                  )}
                 </ul>
               </div>
-              <div className="col-xl-3 col-md-6 col-12">
-                <div className="footer-newsletter footer-col-block">
-                  <div className="footer-heading footer-heading-desktop">
-                    <h6>Sign Up for Email</h6>
-                  </div>
-                  <div className="footer-heading footer-heading-moblie">
-                    <h6>Sign Up for Email</h6>
-                  </div>
-                  <div className="tf-collapse-content">
-                    <div className="footer-menu_item">
-                      Sign up to get first dibs on new arrivals, sales,
-                      exclusive content, events and more!
-                    </div>
-                    <form
-                      className="form-newsletter"
-                      id="subscribe-form"
-                      action="#"
-                      method="post"
-                      acceptCharset="utf-8"
-                      data-mailchimp="true"
-                    >
-                      <div id="subscribe-content">
-                        <fieldset className="email">
-                          <input
-                            type="email"
-                            className="radius-60"
-                            name="email-form"
-                            id="subscribe-email"
-                            placeholder="Enter your email...."
-                            tabIndex={0}
-                            aria-required="true"
-                          />
-                        </fieldset>
-                        <div className="button-submit">
-                          <button
-                            id="subscribe-button"
-                            className="tf-btn btn-sm radius-60 btn-fill btn-icon animate-hover-btn"
-                            type="button"
-                          >
-                            Subscribe
-                            <i className="icon icon-arrow1-top-left" />
-                          </button>
-                        </div>
-                      </div>
-                      <div id="subscribe-msg" />
-                    </form>
-                  </div>
+
+              <div className="col-xl-3 col-md-4 col-12 footer-col-block">
+                <div className="footer-heading footer-heading-desktop">
+                  <h6>Disposability</h6>
                 </div>
+                <div className="footer-heading footer-heading-moblie">
+                  <h6>Disposability</h6>
+                </div>
+                <ul className="footer-menu-list tf-collapse-content">
+                  {modalities.map((modality) => (
+                    <li key={modality.value}>
+                      <Link
+                        href={`/shop?disposability=${modality.value}`}
+                        className="footer-menu_item"
+                      >
+                        {modality.label}
+                      </Link>
+                    </li>
+                  ))}
+                  {modalities.length === 0 && (
+                    <li className="footer-menu_item" style={{ color: "#aaa" }}>
+                      Loading...
+                    </li>
+                  )}
+                </ul>
               </div>
             </div>
           </div>
@@ -235,39 +239,32 @@ export default function Footer() {
             <div className="row">
               <div className="col-12">
                 <div className="footer-bottom-wrap d-flex gap-20 flex-wrap justify-content-between align-items-center">
-                  <div className="footer-menu_item">
-                    © 2025 Ankhoptics. All Rights Reserved
+                  <div className="footer-menu_item d-flex gap-20 flex-wrap">
+                    <span>© 2025 Ankhoptics. All Rights Reserved.</span>
+                    <Link href="/privacy-policy">Privacy Policy</Link>
+                    <Link href="/refund-policy">Refund Policy</Link>
+                    <Link href="/terms-conditions">Terms & Conditions</Link>
                   </div>
-                  <div className="tf-payment">
-                    <Image
-                      src="/store/images/payments/visa.png"
-                      alt="Visa"
-                      width={48}
-                      height={30}
+                  <div className="tf-payment d-flex gap-10 align-items-center">
+                    <img
+                      src="/store/images/cod.png"
+                      alt="Cash on Delivery"
+                      style={{
+                        height: "50px",
+                        width: "auto",
+                        borderRadius: "4px",
+                        border: "1px solid #e5e7eb",
+                      }}
                     />
-                    <Image
-                      src="/store/images/payments/img-1.png"
-                      alt="Payment"
-                      width={48}
-                      height={30}
-                    />
-                    <Image
-                      src="/store/images/payments/img-2.png"
-                      alt="Payment"
-                      width={48}
-                      height={30}
-                    />
-                    <Image
-                      src="/store/images/payments/img-3.png"
-                      alt="Payment"
-                      width={48}
-                      height={30}
-                    />
-                    <Image
-                      src="/store/images/payments/img-4.png"
-                      alt="Payment"
-                      width={48}
-                      height={30}
+                    <img
+                      src="/store/images/Easypaisa_whitebg.svg"
+                      alt="EasyPaisa"
+                      style={{
+                        height: "50px",
+                        width: "auto",
+                        borderRadius: "4px",
+                        border: "1px solid #e5e7eb",
+                      }}
                     />
                   </div>
                 </div>

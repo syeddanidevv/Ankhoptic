@@ -10,7 +10,7 @@ export async function GET() {
     });
 
     let colors: string[] = [];
-    let disposabilities: string[] = [];
+    let disposabilities: {label: string, value: string}[] = [];
 
     for (const setting of settings) {
       if (setting.key === "lens_colors") {
@@ -25,7 +25,7 @@ export async function GET() {
           const parsed = JSON.parse(setting.value);
           if (Array.isArray(parsed)) {
             // modality_options contains objects like { label: "Yearly Disposable", value: "1_YEAR" }
-            disposabilities = parsed.map((item: { label: string; value: string }) => item.label);
+            disposabilities = parsed.map((item: { label: string; value: string }) => ({ label: item.label, value: item.value }));
           }
         } catch {
           console.error("Failed to parse modality_options setting");
@@ -38,7 +38,8 @@ export async function GET() {
       disposabilities,
     });
   } catch (error) {
-    console.error("Error fetching colors and modalities:", error);
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    console.error("[GET /api/store/colors-modalities] Error:", errorMsg);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }

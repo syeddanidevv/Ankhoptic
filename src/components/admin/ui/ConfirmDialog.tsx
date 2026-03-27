@@ -1,5 +1,6 @@
 "use client";
 import { Box, Flex, Text } from "@chakra-ui/react";
+import ReactDOM from "react-dom";
 import { Trash2, AlertTriangle } from "lucide-react";
 import { AdminButton } from "./AdminButton";
 import { T } from "./tokens";
@@ -23,9 +24,9 @@ export function ConfirmDialog({
   onCancel,
   danger = false,
 }: ConfirmDialogProps) {
-  if (!open) return null;
+  if (!open || typeof document === "undefined") return null;
 
-  return (
+  return ReactDOM.createPortal(
     /* Backdrop */
     <Flex
       position="fixed" inset={0} zIndex={9999}
@@ -77,6 +78,7 @@ export function ConfirmDialog({
           </AdminButton>
         </Flex>
       </Box>
-    </Flex>
+    </Flex>,
+    document.body
   );
 }

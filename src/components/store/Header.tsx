@@ -2,7 +2,9 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
+import { useCartStore } from "@/store/cartStore";
 
 const DEFAULT_LOGO = "/store/images/logo/logo.jpg";
 
@@ -17,13 +19,23 @@ type Brand = {
 
 export default function Header() {
   const { data: session } = useSession();
+  const router = useRouter();
   const [logo, setLogo] = useState(DEFAULT_LOGO);
   const [brands, setBrands] = useState<Brand[]>([]);
   const [activeBrand, setActiveBrand] = useState<string>("");
   const [showLensMenu, setShowLensMenu] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [colors, setColors] = useState<string[]>([]);
-  const [modalities, setModalities] = useState<string[]>([]);
+  const [modalities, setModalities] = useState<{label: string, value: string}[]>([]);
+
+  const [mounted, setMounted] = useState(false);
+  const items = useCartStore((state) => state.items);
+  const cartCount = items.reduce((sum, item) => sum + item.qty, 0);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setMounted(true), 0);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Fetch brands + their categories from DB
   useEffect(() => {
@@ -46,13 +58,13 @@ export default function Header() {
         if (d.store_logo) setLogo(d.store_logo);
       })
       .catch(() => {});
-      
+
     // Fetch unique colors and modalities
     fetch("/api/store/colors-modalities")
       .then((r) => r.json())
       .then((d) => {
         if (d.colors) setColors(d.colors);
-        if (d.modalities) setModalities(d.modalities);
+        if (d.disposabilities) setModalities(d.disposabilities);
       })
       .catch((err) => console.error("Error fetching filters:", err));
   }, []);
@@ -338,7 +350,7 @@ export default function Header() {
                       style={{
                         left: "50%",
                         transform: "translateX(-50%)",
-                        minWidth: "150px"
+                        minWidth: "150px",
                       }}
                     >
                       <ul className="menu-list">
@@ -348,21 +360,31 @@ export default function Header() {
                               <Link
                                 href={`/shop?color=${color}`}
                                 className="menu-link-text link text_black-2"
-                                style={{ display: "flex", alignItems: "center", gap: "8px", textTransform: "capitalize" }}
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "8px",
+                                  textTransform: "capitalize",
+                                }}
                               >
-                                <span 
-                                  style={{ 
-                                    display: "inline-block", 
-                                    width: "12px", 
-                                    height: "12px", 
-                                    borderRadius: "50%", 
-                                    backgroundColor: 
-                                      color.toLowerCase() === 'golden' ? 'goldenrod' :
-                                      color.toLowerCase() === 'hazel' ? '#C9A66B' : // A standard hazel-ish color
-                                      color.toLowerCase(),
-                                    border: color.toLowerCase() === 'white' ? '1px solid #ddd' : 'none',
-                                    flexShrink: 0
-                                  }} 
+                                <span
+                                  style={{
+                                    display: "inline-block",
+                                    width: "12px",
+                                    height: "12px",
+                                    borderRadius: "50%",
+                                    backgroundColor:
+                                      color.toLowerCase() === "golden"
+                                        ? "goldenrod"
+                                        : color.toLowerCase() === "hazel"
+                                          ? "#C9A66B" // A standard hazel-ish color
+                                          : color.toLowerCase(),
+                                    border:
+                                      color.toLowerCase() === "white"
+                                        ? "1px solid #ddd"
+                                        : "none",
+                                    flexShrink: 0,
+                                  }}
                                 />
                                 {color.toLowerCase()}
                               </Link>
@@ -370,7 +392,10 @@ export default function Header() {
                           ))
                         ) : (
                           <li>
-                            <span className="menu-link-text link text_black-2" style={{ color: "#aaa" }}>
+                            <span
+                              className="menu-link-text w-100 text-center"
+                              style={{ display: "block", padding: "10px 20px", color: "#aaa" }}
+                            >
                               Loading...
                             </span>
                           </li>
@@ -390,24 +415,27 @@ export default function Header() {
                       style={{
                         left: "50%",
                         transform: "translateX(-50%)",
-                        minWidth: "160px"
+                        minWidth: "160px",
                       }}
                     >
                       <ul className="menu-list">
                         {modalities.length > 0 ? (
                           modalities.map((modality) => (
-                            <li key={modality}>
+                            <li key={modality.value}>
                               <Link
-                                href={`/shop?disposability=${modality}`}
+                                href={`/shop?disposability=${modality.value}`}
                                 className="menu-link-text link text_black-2"
                               >
-                                {modality}
+                                {modality.label}
                               </Link>
                             </li>
                           ))
                         ) : (
                           <li>
-                            <span className="menu-link-text link text_black-2" style={{ color: "#aaa" }}>
+                            <span
+                              className="menu-link-text w-100 text-center"
+                              style={{ display: "block", padding: "10px 20px", color: "#aaa" }}
+                            >
                               Loading...
                             </span>
                           </li>
@@ -573,7 +601,7 @@ export default function Header() {
                             </li>
                             <li style={{ display: "block" }}>
                               <Link
-                                href="/orders"
+                                href="/account/orders"
                                 style={{
                                   display: "flex",
                                   alignItems: "center",
@@ -608,7 +636,10 @@ export default function Header() {
                             />
                             <li style={{ display: "block" }}>
                               <button
-                                onClick={() => signOut({ callbackUrl: "/" })}
+                                onClick={async () => {
+                                  await signOut({ redirect: false });
+                                  router.push("/");
+                                }}
                                 style={{
                                   display: "flex",
                                   alignItems: "center",
@@ -667,7 +698,7 @@ export default function Header() {
                     className="nav-icon-item"
                   >
                     <i className="icon icon-bag" />
-                    <span className="count-box">0</span>
+                    <span className="count-box">{mounted ? cartCount : 0}</span>
                   </a>
                 </li>
               </ul>

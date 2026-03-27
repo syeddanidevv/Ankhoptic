@@ -5,13 +5,13 @@ type Variant =
   | "green" | "red" | "orange" | "blue" | "purple" | "gray" | "yellow";
 
 const BG_MAP: Record<Variant, string> = {
-  green:  "#dcfce7", red:    T.redBg,    orange: "#fff7ed",
-  blue:   T.blueBg,  purple: T.purpleBg, gray:   T.grayBg,
+  green:  T.greenBg,   red:    T.redBg,     orange: "#fee2e2",
+  blue:   T.blueBg,    purple: T.purpleBg,  gray:   T.grayBg,
   yellow: T.warnBg,
 };
 const CLR_MAP: Record<Variant, string> = {
-  green:  "#166534", red:    T.redText,   orange: "#c2410c",
-  blue:   T.blueText,purple: T.purpleText,gray:   T.gray,
+  green:  T.greenDark, red:    T.redText,   orange: "#991b1b",
+  blue:   T.blueText,  purple: T.purpleText, gray:   T.gray,
   yellow: T.warnText,
 };
 
@@ -56,6 +56,7 @@ export function StatusBadge({ children, variant, status }: StatusBadgeProps) {
   const v: Variant = variant ?? (status ? STATUS_VARIANT[status] ?? "gray" : "gray");
   return (
     <Box
+      as="span"
       display="inline-block"
       px={2.5} py={0.5}
       borderRadius="full"

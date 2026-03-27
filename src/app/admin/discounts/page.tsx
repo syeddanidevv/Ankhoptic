@@ -1,7 +1,7 @@
 "use client";
 import NextLink from "next/link";
 import { useState, useEffect } from "react";
-import { Box, Text, HStack, VStack, Checkbox } from "@chakra-ui/react";
+import { Box, Text, Grid, HStack, VStack, Checkbox } from "@chakra-ui/react";
 import {
   T,
   PageHeader,
@@ -16,11 +16,10 @@ import {
   EmptyRow,
   StatusBadge,
   AdminButton,
-  FormField,
-  InputField,
   AdminModal,
   AdminLoader,
 } from "@/components/admin/ui";
+import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
 type Discount = {
@@ -44,39 +43,31 @@ type Discount = {
 };
 
 const TYPE_BG: Record<string, string> = {
-  Percentage: "#f5f3ff",
-  "Fixed amount": "#eff6ff",
-  "Free shipping": "#f0fdf4",
+  Percentage: T.purpleBg,
+  "Fixed amount": T.blueBg,
+  "Free shipping": T.greenBg,
 };
 const TYPE_CLR: Record<string, string> = {
   Percentage: T.purple,
   "Fixed amount": T.blue,
-  "Free shipping": "#166534",
+  "Free shipping": T.greenDark,
 };
 
 export default function DiscountsPage() {
   const [tab, setTab] = useState("All");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<string[]>([]);
+  const router = useRouter();
 
   // Real Data States
   const [discounts, setDiscounts] = useState<Discount[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  // Modal State
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  // Delete modal
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-
-  // Form State
-  const [editingDiscount, setEditingDiscount] = useState<Discount | null>(null);
-  const [title, setTitle] = useState("");
-  const [code, setCode] = useState("");
-  const [type, setType] = useState("PERCENTAGE");
-  const [value, setValue] = useState(0);
-  const [minOrder, setMinOrder] = useState<number | "">("");
-  const [active, setActive] = useState(true);
+  const [deletingDiscount, setDeletingDiscount] = useState<Discount | null>(null);
 
   const fetchDiscounts = () => {
     setLoading(true);
@@ -105,76 +96,16 @@ export default function DiscountsPage() {
       s.includes(id) ? s.filter((x) => x !== id) : [...s, id],
     );
 
-  const openAddModal = () => {
-    setEditingDiscount(null);
-    setTitle("");
-    setCode("");
-    setType("PERCENTAGE");
-    setValue(0);
-    setMinOrder("");
-    setActive(true);
-    setIsModalOpen(true);
-  };
-
-  const openEditModal = (d: Discount) => {
-    setEditingDiscount(d);
-    setTitle(d.title);
-    setCode(d.code || "");
-    setType(d.type);
-    setValue(d.value);
-    setMinOrder(d.minOrderAmount || "");
-    setActive(d.active);
-    setIsModalOpen(true);
-  };
-
   const openDeleteModal = (d: Discount) => {
-    setEditingDiscount(d);
+    setDeletingDiscount(d);
     setIsDeleteModalOpen(true);
   };
 
-  const handleSave = async () => {
-    if (!title.trim() || value <= 0)
-      return toast.error("Valid title and value are required");
-
-    setSubmitting(true);
-    try {
-      const isNew = !editingDiscount;
-      const endpoint = isNew
-        ? "/api/discounts"
-        : `/api/discounts/${editingDiscount.id}`;
-      const method = isNew ? "POST" : "PUT";
-
-      const res = await fetch(endpoint, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title,
-          code: code || null,
-          type,
-          value: Number(value),
-          minOrderAmount: minOrder ? Number(minOrder) : null,
-          active,
-        }),
-      });
-
-      if (!res.ok) throw new Error("Failed to save discount");
-
-      toast.success(isNew ? "Discount created" : "Discount updated");
-      setIsModalOpen(false);
-      fetchDiscounts();
-    } catch (e) {
-      toast.error("Error saving discount");
-      console.error(e);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
   const handleDelete = async () => {
-    if (!editingDiscount) return;
+    if (!deletingDiscount) return;
     setSubmitting(true);
     try {
-      const res = await fetch(`/api/discounts/${editingDiscount.id}`, {
+      const res = await fetch(`/api/discounts/${deletingDiscount.id}`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("Failed to delete discount");
@@ -199,25 +130,22 @@ export default function DiscountsPage() {
   if (loading) return <AdminLoader message="Loading discounts..." />;
 
   return (
-    <Box bg={T.bg} minH="100%" p={6}>
+    <Box bg={T.bg} minH="100%" p={{ base: 4, md: 6 }}>
       <PageHeader
         title="Discounts & Sales"
         subtitle="Manage automatic sales and promo codes"
       >
-        <AdminButton variant="secondary" onClick={openAddModal}>
-          Create promo code
-        </AdminButton>
         <NextLink href="/admin/discounts/new" style={{ textDecoration: "none" }}>
-          <AdminButton variant="primary">Create sale</AdminButton>
+          <AdminButton variant="primary">Create sale / discount</AdminButton>
         </NextLink>
       </PageHeader>
 
-      <HStack gap={4} mb={5}>
+      <Grid templateColumns={{ base: "repeat(2,1fr)", md: "repeat(4,1fr)" }} gap={4} mb={5}>
         <StatCard label="Total Sales/Codes" value={total} />
         <StatCard label="Active" value={activeCount} color={T.green} />
         <StatCard label="Expired" value={expiredCount} color={T.red} />
         <StatCard label="Total Usage" value={totalUsed} color={T.blue} />
-      </HStack>
+      </Grid>
 
       <TableShell
         footerText={`${total} discounts found`}
@@ -373,7 +301,7 @@ export default function DiscountsPage() {
                       <AdminButton
                         variant="secondary"
                         size="xs"
-                        onClick={() => openEditModal(d)}
+                        onClick={() => router.push(`/admin/discounts/new?id=${d.id}`)}
                       >
                         Edit
                       </AdminButton>
@@ -393,96 +321,6 @@ export default function DiscountsPage() {
         </tbody>
       </TableShell>
 
-      {/* CREATE / EDIT MODAL */}
-      <AdminModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title={editingDiscount ? "Edit Discount" : "Add Discount"}
-        maxW="lg"
-      >
-        <Box mb={4}>
-          <FormField label="Discount Title">
-            <InputField
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. Summer Sale 20%"
-            />
-          </FormField>
-          <FormField label="Promo Code (Optional)">
-            <InputField
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              placeholder="e.g. SUMMER20"
-            />
-          </FormField>
-          <FormField label="Type">
-            <select
-              value={type}
-              onChange={(e) => setType(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "8px 12px",
-                borderRadius: "8px",
-                border: `1px solid ${T.border}`,
-                background: T.bg,
-                color: T.text,
-              }}
-            >
-              <option value="PERCENTAGE">Percentage</option>
-              <option value="FIXED_AMOUNT">Fixed Amount</option>
-              <option value="FREE_SHIPPING">Free Shipping</option>
-            </select>
-          </FormField>
-          <HStack gap={4}>
-            <Box flex={1}>
-              <FormField label="Value">
-                <InputField
-                  type="number"
-                  value={value}
-                  onChange={(e) => setValue(Number(e.target.value))}
-                />
-              </FormField>
-            </Box>
-            <Box flex={1}>
-              <FormField label="Min Order Amount (optional)">
-                <InputField
-                  type="number"
-                  value={minOrder}
-                  onChange={(e) =>
-                    setMinOrder(
-                      e.target.value === "" ? "" : Number(e.target.value),
-                    )
-                  }
-                />
-              </FormField>
-            </Box>
-          </HStack>
-          <FormField label="Status" mb={2}>
-            <HStack>
-              <Checkbox.Root
-                checked={active}
-                onCheckedChange={(e) => setActive(!!e.checked)}
-              >
-                <Checkbox.HiddenInput />
-                <Checkbox.Control />
-                <Checkbox.Label>Active Discount</Checkbox.Label>
-              </Checkbox.Root>
-            </HStack>
-          </FormField>
-        </Box>
-        <HStack justify="flex-end" gap={3}>
-          <AdminButton variant="ghost" onClick={() => setIsModalOpen(false)}>
-            Cancel
-          </AdminButton>
-          <AdminButton
-            variant="primary"
-            onClick={handleSave}
-            disabled={submitting}
-          >
-            {submitting ? "Saving..." : "Save"}
-          </AdminButton>
-        </HStack>
-      </AdminModal>
 
       {/* DELETE MODAL */}
       <AdminModal
@@ -494,7 +332,7 @@ export default function DiscountsPage() {
         description={
           <>
             Are you sure you want to delete the discount{" "}
-            <b>{editingDiscount?.title}</b>? This action cannot be undone.
+            <b>{deletingDiscount?.title}</b>? This action cannot be undone.
           </>
         }
       >

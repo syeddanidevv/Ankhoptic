@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Box, Text, HStack, Image } from "@chakra-ui/react";
+import { Box, Text, HStack, Grid, Image } from "@chakra-ui/react";
 import {
   T,
   PageHeader,
@@ -189,7 +189,7 @@ export default function BrandsPage() {
   if (loading) return <AdminLoader message="Loading brands..." />;
 
   return (
-    <Box bg={T.bg} minH="100%" p={6}>
+    <Box bg={T.bg} minH="100%" p={{ base: 4, md: 6 }}>
       <PageHeader
         title="Brands"
         subtitle="Lens manufacturers available in your store"
@@ -199,7 +199,7 @@ export default function BrandsPage() {
         </AdminButton>
       </PageHeader>
 
-      <HStack gap={4} mb={5}>
+      <Grid templateColumns={{ base: "repeat(2,1fr)", md: "repeat(3,1fr)" }} gap={4} mb={5}>
         <StatCard label="Total Brands" value={brands.length} />
         <StatCard
           label="Total Products"
@@ -212,7 +212,7 @@ export default function BrandsPage() {
             brands.length > 0 ? Math.round(totalProducts / brands.length) : 0
           }
         />
-      </HStack>
+      </Grid>
 
       <TableShell footerText={`${brands.length} brands`} showPagination={false}>
         <THead columns={["Brand", "Logo", "Products", "Added On", ""]} />

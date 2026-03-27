@@ -20,7 +20,7 @@ export function SectionCard({ title, subtitle, headerRight, children, p = 5, ove
       borderRadius="12px" overflow={overflow} shadow="sm"
     >
       <Box
-        px={5} py={4} borderBottom={`1px solid #f8fafc`}
+        px={5} py={4} borderBottom={`1px solid ${T.divider}`}
         display="flex" alignItems="center" justifyContent="space-between"
       >
         <Box>

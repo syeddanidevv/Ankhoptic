@@ -18,11 +18,12 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",  // Next.js needs unsafe-eval in dev
-      "style-src 'self' 'unsafe-inline'",                 // Chakra UI injects inline styles
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:", // blob: needed for HMR or WebWorkers
+      "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https:",
       "font-src 'self' data:",
-      "connect-src 'self'",
+      "connect-src 'self' wss: https:", // wss: required for Hot Module Reloading in dev
+      "frame-src 'self' https://www.google.com https://*.google.com", // allow Google Maps embeds
       "frame-ancestors 'none'",
     ].join("; "),
   },

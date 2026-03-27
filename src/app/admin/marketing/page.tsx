@@ -13,20 +13,20 @@ const CAMPAIGNS = [
 
 export default function MarketingPage() {
   return (
-    <Box bg={T.bg} minH="100%" p={6}>
+    <Box bg={T.bg} minH="100%" p={{ base: 4, md: 6 }}>
       <PageHeader title="Marketing" subtitle="Campaigns and customer outreach">
         <AdminButton variant="secondary">View reports</AdminButton>
         <AdminButton variant="primary">Create campaign</AdminButton>
       </PageHeader>
 
-      <HStack gap={4} mb={5}>
+      <Grid templateColumns={{ base: "repeat(2,1fr)", md: "repeat(4,1fr)" }} gap={4} mb={5}>
         <StatCard label="Active Campaigns"  value={CAMPAIGNS.filter(c => c.status === "Active").length} color={T.green} />
         <StatCard label="Scheduled"         value={CAMPAIGNS.filter(c => c.status === "Scheduled").length} color={T.blue} />
         <StatCard label="Total Reach"       value="2,831"  color={T.purple} />
         <StatCard label="Email Open Rate"   value="32.4%"  color={T.warn} sub="+2.1% vs last month" up />
-      </HStack>
+      </Grid>
 
-      <Grid templateColumns="2fr 1fr" gap={4}>
+      <Grid templateColumns={{ base: "1fr", lg: "2fr 1fr" }} gap={4}>
         {/* Campaigns list */}
         <GridItem>
           <SectionCard title="Campaigns">

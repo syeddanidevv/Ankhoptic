@@ -100,15 +100,20 @@ export async function POST(req: NextRequest) {
         }
 
         // Generate slug if not provided
-        const slug =
+        let slug =
           row.slug?.trim() ||
           row.title
             .trim()
             .toLowerCase()
             .replace(/[^a-z0-9]+/g, "-")
-            .replace(/(^-|-$)/g, "") +
-            "-" +
-            Date.now();
+            .replace(/(^-|-$)/g, "");
+
+        // Check if slug already exists, append random suffix if needed
+        let existingProduct = await prisma.product.findUnique({ where: { slug } });
+        if (existingProduct) {
+          const randomSuffix = Math.random().toString(36).substring(2, 8);
+          slug = `${slug}-${randomSuffix}`;
+        }
 
         // ── Upload images for this row ─────────────────────────────────
         const imageUrls: string[] = [];

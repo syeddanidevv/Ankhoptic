@@ -2,7 +2,7 @@
 import { Box, Flex, VStack, Text, Spacer } from "@chakra-ui/react";
 import NextLink from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, Menu, X } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 
@@ -52,8 +52,9 @@ const ICONS: Record<string, string> = {
   Customers:
     "M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2 M9 7a4 4 0 100 8 4 4 0 000-8z M23 21v-2a4 4 0 00-3-3.87 M16 3.13a4 4 0 010 7.75",
   Analytics: "M18 20V10 M12 20V4 M6 20v-6",
-  Marketing: "M22 2L11 13 M22 2l-7 20-4-9-9-4 20-7z",
   Discounts: "M9 9h.01 M15 15h.01 M19.07 4.93A10 10 0 104.93 19.07 M5 19L19 5",
+  "Store Appearance": "M12 20h9 M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z",
+  Testimonials: "M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z",
   Settings:
     "M12 15a3 3 0 100-6 3 3 0 000 6z M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z",
 };
@@ -83,12 +84,6 @@ const NAV: NavSection[] = [
       {
         label: "Orders",
         href: "/admin/orders",
-        badge: "5",
-        children: [
-          { label: "All orders", href: "/admin/orders" },
-          { label: "Drafts", href: "/admin/orders/drafts" },
-          { label: "Abandoned checkouts", href: "/admin/orders/abandoned" },
-        ],
       },
       {
         label: "Products",
@@ -104,14 +99,9 @@ const NAV: NavSection[] = [
       },
       { label: "Customers", href: "/admin/customers" },
       { label: "Analytics", href: "/admin/analytics" },
-      {
-        label: "Marketing", href: "/admin/marketing",
-        children: [
-          { label: "Marketing", href: "/admin/marketing" },
-          { label: "Store Appearance", href: "/admin/marketing/store-settings" },
-        ],
-      },
+      { label: "Store Appearance", href: "/admin/marketing/store-settings" },
       { label: "Discounts", href: "/admin/discounts" },
+      { label: "Testimonials", href: "/admin/testimonials" },
     ],
   },
   {
@@ -309,7 +299,13 @@ function SidebarUserFooter() {
 }
 
 /* ─── Sidebar content (shared between desktop + mobile) ─── */
-function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
+function SidebarContent({
+  onNavigate,
+  ordersBadge,
+}: {
+  onNavigate?: () => void;
+  ordersBadge?: string;
+}) {
   return (
     <>
       {/* Logo */}
@@ -352,7 +348,12 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
               </Text>
             )}
             {section.items.map((item) => (
-              <NavItem key={item.href} {...item} onNavigate={onNavigate} />
+              <NavItem
+                key={item.href}
+                {...item}
+                badge={item.label === "Orders" && ordersBadge ? ordersBadge : item.badge}
+                onNavigate={onNavigate}
+              />
             ))}
           </Box>
         ))}
@@ -372,6 +373,18 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 /* ─── Main Layout ─── */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [unfulfilledCount, setUnfulfilledCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    fetch("/api/admin/dashboard")
+      .then((r) => r.json())
+      .then((d) => {
+        if (!d.error && typeof d.unfulfilled === "number") {
+          setUnfulfilledCount(d.unfulfilled);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <Flex h="100vh" overflow="hidden" bg={ADMIN_THEME.bg}>
@@ -388,7 +401,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         zIndex={50}
         css={{ "&::-webkit-scrollbar": { display: "none" } }}
       >
-        <SidebarContent />
+        <SidebarContent ordersBadge={unfulfilledCount !== null && unfulfilledCount > 0 ? String(unfulfilledCount) : undefined} />
       </Box>
 
       {/* ════ MOBILE SIDEBAR OVERLAY ════ */}
@@ -423,7 +436,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             >
               <X size={18} />
             </Box>
-            <SidebarContent onNavigate={() => setMobileOpen(false)} />
+            <SidebarContent onNavigate={() => setMobileOpen(false)} ordersBadge={unfulfilledCount !== null && unfulfilledCount > 0 ? String(unfulfilledCount) : undefined} />
           </Box>
         </>
       )}

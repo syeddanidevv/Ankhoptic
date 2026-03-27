@@ -1,12 +1,12 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import NextLink from "next/link";
 import {
-  Box, Flex, HStack, VStack, Text, RadioGroup, Checkbox, chakra,
+  Box, Flex, HStack, VStack, Text, RadioGroup, Checkbox,
 } from "@chakra-ui/react";
 import {
-  T, PageHeader, SectionCard, FormField, AdminButton, InputField, inputProps,
+  T, PageHeader, SectionCard, FormField, AdminButton, InputField, AdminLoader, SelectField,
 } from "@/components/admin/ui";
 import toast from "react-hot-toast";
 
@@ -15,6 +15,10 @@ type Brand    = { id: string; name: string };
 
 export default function NewDiscountPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const editId = searchParams.get("id");
+
+  const [isLoadingItem, setIsLoadingItem] = useState(!!editId);
 
   // Form fields
   const [title, setTitle]         = useState("");
@@ -42,7 +46,39 @@ export default function NewDiscountPage() {
     fetch("/api/brands")
       .then((r) => r.json())
       .then((d) => setBrands(d.brands || d || []));
-  }, []);
+
+    if (editId) {
+      fetch(`/api/discounts/${editId}`)
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.discount) {
+            const d = data.discount;
+            setTitle(d.title);
+            setCode(d.code || "");
+            setType(d.type);
+            setValue(d.value);
+            setMinOrder(d.minOrderAmount || "");
+            setStartsAt(d.startsAt ? new Date(d.startsAt).toISOString().slice(0, 16) : "");
+            setEndsAt(d.endsAt ? new Date(d.endsAt).toISOString().slice(0, 16) : "");
+            setActive(d.active);
+            setIsAutomatic(d.isAutomatic);
+            
+            if (d.appliesToAll) {
+              setAppliesTo("all");
+            } else if (d.categories && d.categories.length > 0) {
+              setAppliesTo("categories");
+              setSelectedCats(d.categories.map((c: { id: string }) => c.id));
+            } else if (d.brands && d.brands.length > 0) {
+              setAppliesTo("brands");
+              setSelectedBrands(d.brands.map((b: { id: string }) => b.id));
+            } else {
+              setAppliesTo("all");
+            }
+          }
+        })
+        .finally(() => setIsLoadingItem(false));
+    }
+  }, [editId]);
 
   const toggleCat = (id: string) =>
     setSelectedCats((s) => s.includes(id) ? s.filter((x) => x !== id) : [...s, id]);
@@ -54,8 +90,11 @@ export default function NewDiscountPage() {
     if (!title.trim() || !value) return toast.error("Title and value required");
     setSubmitting(true);
     try {
-      const res = await fetch("/api/discounts", {
-        method: "POST",
+      const endpoint = editId ? `/api/discounts/${editId}` : "/api/discounts";
+      const method = editId ? "PUT" : "POST";
+      
+      const res = await fetch(endpoint, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title, code: code || null, type, value: Number(value),
@@ -68,20 +107,24 @@ export default function NewDiscountPage() {
         }),
       });
       if (!res.ok) throw new Error();
-      toast.success("Discount created!");
+      toast.success(editId ? "Discount updated!" : "Discount created!");
       router.push("/admin/discounts");
     } catch {
-      toast.error("Failed to create discount");
+      toast.error(editId ? "Failed to update discount" : "Failed to create discount");
     } finally {
       setSubmitting(false);
     }
   };
 
+  if (isLoadingItem) {
+    return <AdminLoader message="Loading discount details..." />;
+  }
+
 
   return (
     <Box bg={T.bg} minH="100%" p={6}>
-      <Flex maxW="800px" mx="auto" direction="column" gap={5}>
-        <PageHeader title="Create Discount / Sale" subtitle="% off or fixed amount — apply to entire store, category, or brand.">
+      <Flex direction="column" gap={5}>
+        <PageHeader title={editId ? "Edit Discount / Sale" : "Create Discount / Sale"} subtitle="% off or fixed amount — apply to entire store, category, or brand.">
           <NextLink href="/admin/discounts" style={{ textDecoration: "none" }}>
             <AdminButton variant="secondary">Discard</AdminButton>
           </NextLink>
@@ -90,41 +133,39 @@ export default function NewDiscountPage() {
           </AdminButton>
         </PageHeader>
 
+        <HStack align="flex-start" gap={6} w="100%" flexWrap={{ base: "wrap", lg: "nowrap" }}>
+          {/* ── MAIN COLUMN ── */}
+          <VStack flex={1} gap={5} align="stretch" w="100%" minW="300px">
+
         {/* ── Title & Code ── */}
         <SectionCard title="Title & Code">
-          <FormField label="Title" hint="Customers see this on checkout.">
-            <InputField value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Eid Sale 20%" />
-          </FormField>
-          <FormField label="Promo Code (optional)" hint="Leave empty for automatic sale (no code needed).">
-            <InputField value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder="e.g. EID20" />
-          </FormField>
-          <HStack gap={3} mt={2}>
-            <Checkbox.Root checked={isAutomatic} onCheckedChange={(e) => setIsAutomatic(!!e.checked)} size="sm">
-              <Checkbox.HiddenInput />
-              <Checkbox.Control />
-              <Checkbox.Label fontSize="13px">Automatic (no code required)</Checkbox.Label>
-            </Checkbox.Root>
-            <Checkbox.Root checked={active} onCheckedChange={(e) => setActive(!!e.checked)} size="sm">
-              <Checkbox.HiddenInput />
-              <Checkbox.Control />
-              <Checkbox.Label fontSize="13px">Active</Checkbox.Label>
-            </Checkbox.Root>
-          </HStack>
+          <Flex direction={{ base: "column", sm: "row" }} gap={4}>
+            <Box flex={1}>
+              <FormField label="Title" hint="Customers see this on checkout.">
+                <InputField value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Eid Sale 20%" />
+              </FormField>
+            </Box>
+            <Box flex={1}>
+              <FormField label="Promo Code (optional)" hint="Leave empty for automatic sale (no code needed).">
+                <InputField value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder="e.g. EID20" />
+              </FormField>
+            </Box>
+          </Flex>
         </SectionCard>
 
         {/* ── Discount Type & Value ── */}
         <SectionCard title="Discount Type & Value">
-          <HStack gap={4} align="flex-start">
+          <Flex direction={{ base: "column", sm: "row" }} gap={4} align={{ base: "stretch", sm: "flex-start" }}>
             <Box flex={1}>
               <FormField label="Type">
-                <chakra.select
-                  {...inputProps}
+                <SelectField
+                  options={[
+                    { value: "PERCENTAGE", label: "Percentage (%)" },
+                    { value: "FIXED_AMOUNT", label: "Fixed Amount (Rs.)" },
+                  ]}
                   value={type}
-                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setType(e.target.value)}
-                >
-                  <option value="PERCENTAGE">Percentage (%)</option>
-                  <option value="FIXED_AMOUNT">Fixed Amount (Rs.)</option>
-                </chakra.select>
+                  onChange={(e) => setType(e.target.value)}
+                />
               </FormField>
             </Box>
             <Box flex={1}>
@@ -138,7 +179,7 @@ export default function NewDiscountPage() {
                 <InputField type="number" value={minOrder} onChange={(e) => setMinOrder(e.target.value === "" ? "" : Number(e.target.value))} placeholder="0" />
               </FormField>
             </Box>
-          </HStack>
+          </Flex>
         </SectionCard>
 
         {/* ── Applies To ── */}
@@ -194,23 +235,46 @@ export default function NewDiscountPage() {
           </RadioGroup.Root>
         </SectionCard>
 
-        {/* ── Active Dates ── */}
-        <SectionCard title="Active Dates">
-          <HStack gap={4}>
-            <Box flex={1}>
-              <FormField label="Start date">
-                <InputField type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} />
-              </FormField>
-            </Box>
-            <Box flex={1}>
-              <FormField label="End date (optional)">
-                <InputField type="datetime-local" value={endsAt} onChange={(e) => setEndsAt(e.target.value)} />
-              </FormField>
-            </Box>
-          </HStack>
-        </SectionCard>
+          </VStack>
 
-        <Flex justify="flex-end" py={4}>
+          {/* ── SIDE COLUMN ── */}
+          <VStack w={{ base: "100%", lg: "320px" }} flexShrink={0} gap={5} align="stretch">
+            {/* ── Status ── */}
+            <SectionCard title="Status">
+              <VStack align="flex-start" gap={4}>
+                <Checkbox.Root checked={active} onCheckedChange={(e) => setActive(!!e.checked)} size="md">
+                  <Checkbox.HiddenInput />
+                  <Checkbox.Control />
+                  <Checkbox.Label fontSize="14px" fontWeight={500} color={T.text}>
+                    Active Discount
+                  </Checkbox.Label>
+                </Checkbox.Root>
+                <Checkbox.Root checked={isAutomatic} onCheckedChange={(e) => setIsAutomatic(!!e.checked)} size="md">
+                  <Checkbox.HiddenInput />
+                  <Checkbox.Control />
+                  <Checkbox.Label fontSize="14px" fontWeight={500} color={T.text}>
+                    Automatic (no code required)
+                  </Checkbox.Label>
+                </Checkbox.Root>
+              </VStack>
+            </SectionCard>
+
+            {/* ── Active Dates ── */}
+            <SectionCard title="Active Dates">
+              <VStack align="stretch" gap={4}>
+                <FormField label="Start date">
+                  <InputField type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} />
+                </FormField>
+                <FormField label="End date (optional)">
+                  <InputField type="datetime-local" value={endsAt} onChange={(e) => setEndsAt(e.target.value)} />
+                </FormField>
+              </VStack>
+            </SectionCard>
+          </VStack>
+        </HStack>
+
+        {/* ── Footer Actions ── */}
+        <Flex justify="flex-end" py={4} borderTop={`1px solid ${T.border}`} mt={4}>
           <HStack gap={3}>
             <NextLink href="/admin/discounts" style={{ textDecoration: "none" }}>
               <AdminButton variant="secondary">Discard</AdminButton>

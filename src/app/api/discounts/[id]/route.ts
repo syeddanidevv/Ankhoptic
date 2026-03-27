@@ -3,6 +3,34 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/requireAdmin";
 
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const authErr = await requireAdmin();
+  if (authErr) return authErr;
+
+  try {
+    const { id } = await params;
+    const discount = await prisma.discount.findUnique({
+      where: { id },
+      include: {
+        categories: true,
+        brands: true,
+      },
+    });
+
+    if (!discount) {
+      return NextResponse.json({ error: "Discount not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ discount });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ error: "Failed to fetch discount" }, { status: 500 });
+  }
+}
+
 export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }

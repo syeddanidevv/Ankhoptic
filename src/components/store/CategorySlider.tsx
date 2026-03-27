@@ -1,31 +1,55 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
+import CarouselTrigger from "./CarouselTrigger";
 
 export default async function CategorySlider() {
-  const categories = await prisma.category.findMany({
-    select: {
-      id: true,
-      name: true,
-      slug: true,
-      brand: {
-        select: { name: true, slug: true },
+  type CategoryWithBrand = {
+    id: string;
+    name: string;
+    slug: string;
+    brand: { name: string; slug: string } | null;
+  };
+
+  let categories: CategoryWithBrand[] = [];
+  try {
+    categories = await prisma.category.findMany({
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        brand: {
+          select: { name: true, slug: true },
+        },
       },
-    },
-    orderBy: { position: "asc" },
-  });
+      orderBy: { position: "asc" },
+    });
+  } catch (error) {
+    console.error("Database connection failed in CategorySlider:", error);
+  }
 
   if (categories.length === 0) return null;
 
   return (
     <section className="flat-spacing-9">
       <style>{`
-        .tf-sw-collection:not(.swiper-initialized) .swiper-wrapper {
+        .category-card {
           display: flex;
-          overflow: hidden;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          min-height: 200px;
+          gap: 8px;
+          text-decoration: none;
+          background: linear-gradient(135deg, #f0f4ff 0%, #e8eeff 100%);
+          padding: 20px 12px;
         }
-        .tf-sw-collection:not(.swiper-initialized) .swiper-slide {
-          min-width: calc(100% / 6);
-          flex-shrink: 0;
+        @media (max-width: 767px) {
+          .category-card { min-height: 130px; gap: 6px; padding: 14px 12px; }
+        }
+        .nav-next-collection,
+        .nav-prev-collection {
+          top: 50% !important;
+          transform: translateY(-50%) !important;
         }
       `}</style>
       <div className="container-full">
@@ -45,8 +69,8 @@ export default async function CategorySlider() {
             data-space-lg={30}
             data-space-md={30}
             data-space={15}
-            data-loop="false"
-            data-auto-play="false"
+            data-loop="true"
+            data-auto-play="true"
           >
             <div className="swiper-wrapper">
               {categories.map((cat) => (
@@ -61,19 +85,36 @@ export default async function CategorySlider() {
                           flexDirection: "column",
                           alignItems: "center",
                           justifyContent: "center",
-                          minHeight: 200,
-                          gap: 8,
+                          minHeight: 130,
+                          gap: 6,
                           textDecoration: "none",
-                          background: "linear-gradient(135deg, #f0f4ff 0%, #e8eeff 100%)",
-                          padding: "20px 12px",
+                          background:
+                            "linear-gradient(135deg, #f0f4ff 0%, #e8eeff 100%)",
+                          padding: "14px 12px",
                         }}
                       >
                         {cat.brand && (
-                          <span style={{ fontSize: 11, fontWeight: 600, color: "#6b7280", textTransform: "uppercase", letterSpacing: 1.5 }}>
+                          <span
+                            style={{
+                              fontSize: 11,
+                              fontWeight: 600,
+                              color: "#6b7280",
+                              textTransform: "uppercase",
+                              letterSpacing: 1.5,
+                            }}
+                          >
                             {cat.brand.name}
                           </span>
                         )}
-                        <span style={{ fontSize: 15, fontWeight: 700, textAlign: "center", color: "#1e2d5a", lineHeight: 1.3 }}>
+                        <span
+                          style={{
+                            fontSize: 15,
+                            fontWeight: 700,
+                            textAlign: "center",
+                            color: "#1e2d5a",
+                            lineHeight: 1.3,
+                          }}
+                        >
                           {cat.name}
                         </span>
                       </Link>
@@ -92,6 +133,7 @@ export default async function CategorySlider() {
           <div className="sw-dots style-2 sw-pagination-collection justify-content-center" />
         </div>
       </div>
+      <CarouselTrigger />
     </section>
   );
 }

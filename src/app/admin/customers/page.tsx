@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Box, Text, HStack, VStack, Checkbox, Avatar } from "@chakra-ui/react";
+import { Box, Text, Grid, HStack, VStack, Checkbox, Avatar } from "@chakra-ui/react";
 import {
   T,
   PageHeader,
@@ -80,14 +80,14 @@ export default function CustomersPage() {
   if (loading) return <AdminLoader message="Loading customers..." />;
 
   return (
-    <Box bg={T.bg} minH="100%" p={6}>
+    <Box bg={T.bg} minH="100%" p={{ base: 4, md: 6 }}>
       <PageHeader title="Customers" subtitle={`${total} total customers`}>
         <AdminButton variant="secondary">Export</AdminButton>
         <AdminButton variant="primary">Add customer</AdminButton>
       </PageHeader>
 
       {/* Stat cards */}
-      <HStack gap={4} mb={5}>
+      <Grid templateColumns={{ base: "repeat(2,1fr)", md: "repeat(4,1fr)" }} gap={4} mb={5}>
         <StatCard label="Total Customers" value={total} />
         <StatCard
           label="Total Revenue"
@@ -106,7 +106,7 @@ export default function CustomersPage() {
           }
           color={T.blue}
         />
-      </HStack>
+      </Grid>
 
       <TableShell
         footerText={`Showing ${customers.length} of ${total} customers`}

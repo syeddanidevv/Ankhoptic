@@ -22,10 +22,10 @@ export function THead({ columns, checkboxCol = false }: THeadProps) {
         )}
         {columns.map((h, idx) => (
           <th
-            key={h}
+            key={h + idx}
             style={{
               padding: "10px 16px",
-              textAlign: idx === 0 ? "left" : "center",
+              textAlign: "left",
               fontSize: "11px",
               color: T.sub,
               fontWeight: 600,
@@ -33,8 +33,6 @@ export function THead({ columns, checkboxCol = false }: THeadProps) {
               letterSpacing: "0.5px",
               borderBottom: `1px solid ${T.border}`,
               whiteSpace: "nowrap",
-              // First column expands to fill available space; all others shrink to content
-              width: idx === 0 ? "100%" : "1%",
             }}
           >
             {h}
@@ -73,7 +71,7 @@ export function TableShell({
       {/* Header slot: TabBar, FilterBar, BulkBar — outside <table> */}
       {header && <Box>{header}</Box>}
       <Box overflowX="auto">
-        <style>{`.admin-table td:not(:first-child) { white-space: nowrap; text-align: center; }`}</style>
+        <style>{`.admin-table td:not(:first-child) { white-space: nowrap; text-align: left; }`}</style>
         <table className="admin-table" style={{ width: "100%", borderCollapse: "collapse" }}>
           {children}
         </table>

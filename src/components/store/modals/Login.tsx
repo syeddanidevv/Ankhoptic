@@ -7,16 +7,20 @@ import { useRouter } from "next/navigation";
 // Helper: close any Bootstrap modal by id
 function closeModal(id: string) {
   if (typeof window === "undefined") return;
-  // Try Bootstrap JS API first
-  const el = document.getElementById(id);
-  if (el && (window as any).bootstrap?.Modal) {
-    (window as any).bootstrap.Modal.getInstance(el)?.hide();
-  } else if (el) {
-    // Manual fallback
-    el.classList.remove("show");
-    el.style.display = "none";
-    document.body.classList.remove("modal-open");
-    document.querySelectorAll(".modal-backdrop").forEach((b) => b.remove());
+  try {
+    // Try Bootstrap JS API first
+    const el = document.getElementById(id);
+    if (el && (window as any).bootstrap?.Modal) {
+      (window as any).bootstrap.Modal.getInstance(el)?.hide();
+    } else if (el) {
+      // Manual fallback
+      el.classList.remove("show");
+      el.style.display = "none";
+      document.body.classList.remove("modal-open");
+      document.querySelectorAll(".modal-backdrop").forEach((b) => b.remove());
+    }
+  } catch (error) {
+    console.warn(`Failed to close modal "${id}":`, error);
   }
 }
 

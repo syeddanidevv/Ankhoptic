@@ -1,0 +1,35 @@
+2026-03-26T12:15:28Z INF Thank you for trying Cloudflare Tunnel. Doing so, without a Cloudflare account, is a quick way to experiment and try it out. However, be aware that these account-less Tunnels have no uptime guarantee, are subject to the Cloudflare Online Services Terms of Use (https://www.cloudflare.com/website-terms/), and Cloudflare reserves the right to investigate your use of Tunnels for violations of such terms. If you intend to use Tunnels in production you should use a pre-created named tunnel by following: https://developers.cloudflare.com/cloudflare-one/connections/connect-apps
+2026-03-26T12:15:28Z INF Requesting new quick Tunnel on trycloudflare.com...
+2026-03-26T12:15:33Z INF +--------------------------------------------------------------------------------------------+
+2026-03-26T12:15:33Z INF |  Your quick Tunnel has been created! Visit it at (it may take some time to be reachable):  |
+2026-03-26T12:15:33Z INF |  https://cute-slim-building-coordinates.trycloudflare.com                                  |
+2026-03-26T12:15:33Z INF +--------------------------------------------------------------------------------------------+
+2026-03-26T12:15:33Z INF Cannot determine default configuration path. No file [config.yml config.yaml] in [~/.cloudflared ~/.cloudflare-warp ~/cloudflare-warp]
+2026-03-26T12:15:33Z INF Version 2025.8.1 (Checksum b5d598b00cc3a28cabc5812d9f762819334614bae452db4e7f23eefe7b081556)
+2026-03-26T12:15:33Z INF GOOS: windows, GOVersion: go1.24.2, GoArch: amd64
+2026-03-26T12:15:33Z INF Settings: map[ha-connections:1 protocol:quic url:http://localhost:3000]
+2026-03-26T12:15:33Z INF cloudflared will not automatically update on Windows systems.
+2026-03-26T12:15:34Z INF Generated Connector ID: 790e87db-533f-4a25-b3d3-9106fcaf40cd
+2026-03-26T12:15:34Z INF Initial protocol quic
+2026-03-26T12:15:34Z INF ICMP proxy will use 192.168.1.110 as source for IPv4
+2026-03-26T12:15:34Z INF ICMP proxy will use ::1 in zone Loopback Pseudo-Interface 1 as source for IPv6
+2026-03-26T12:15:34Z ERR Cannot determine default origin certificate path. No file cert.pem in [~/.cloudflared ~/.cloudflare-warp ~/cloudflare-warp]. You need to specify the origin certificate path by specifying the origincert option in the configuration file, or set TUNNEL_ORIGIN_CERT environment variable originCertPath=
+2026-03-26T12:15:34Z INF cloudflared does not support loading the system root certificate pool on Windows. Please use --origin-ca-pool <PATH> to specify the path to the certificate pool
+2026-03-26T12:15:34Z INF ICMP proxy will use 192.168.1.110 as source for IPv4
+2026-03-26T12:15:34Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveP256] connIndex=0 event=0 ip=198.41.200.23
+2026-03-26T12:15:34Z INF ICMP proxy will use ::1 in zone Loopback Pseudo-Interface 1 as source for IPv6
+2026-03-26T12:15:34Z INF Starting metrics server on 127.0.0.1:20241/metrics
+2026-03-26T12:15:35Z INF Registered tunnel connection connIndex=0 connection=530fe988-0b72-452d-a043-1ea0751aba49 event=0 ip=198.41.200.23 location=mrs06 protocol=quic
+2026-03-26T12:35:37Z ERR  error="Incoming request ended abruptly: context canceled" connIndex=0 event=1 ingressRule=0 originService=http://localhost:3000
+2026-03-26T12:35:37Z ERR Request failed error="Incoming request ended abruptly: context canceled" connIndex=0 dest=https://cute-slim-building-coordinates.trycloudflare.com/?_rsc=1319b event=0 ip=198.41.200.23 type=http
+2026-03-26T12:37:43Z ERR  error="Incoming request ended abruptly: context canceled" connIndex=0 event=1 ingressRule=0 originService=http://localhost:3000
+2026-03-26T12:37:43Z ERR Request failed error="Incoming request ended abruptly: context canceled" connIndex=0 dest=https://cute-slim-building-coordinates.trycloudflare.com/ event=0 ip=198.41.200.23 type=http
+2026-03-26T12:39:50Z ERR  error="Incoming request ended abruptly: context canceled" connIndex=0 event=1 ingressRule=0 originService=http://localhost:3000
+2026-03-26T12:39:50Z ERR Request failed error="Incoming request ended abruptly: context canceled" connIndex=0 dest=https://cute-slim-building-coordinates.trycloudflare.com/favicon.ico event=0 ip=198.41.200.23 type=http
+2026-03-26T12:42:18Z ERR  error="Incoming request ended abruptly: context canceled" connIndex=0 event=1 ingressRule=0 originService=http://localhost:3000
+2026-03-26T12:42:18Z ERR Request failed error="Incoming request ended abruptly: context canceled" connIndex=0 dest=https://cute-slim-building-coordinates.trycloudflare.com/ event=0 ip=198.41.200.23 type=http
+2026-03-26T12:42:44Z ERR  error="Incoming request ended abruptly: context canceled" connIndex=0 event=1 ingressRule=0 originService=http://localhost:3000
+2026-03-26T12:42:44Z ERR Request failed error="Incoming request ended abruptly: context canceled" connIndex=0 dest=https://cute-slim-building-coordinates.trycloudflare.com/favicon.ico event=0 ip=198.41.200.23 type=http
+2026-03-26T13:15:39Z ERR  error="Incoming request ended abruptly: context canceled" connIndex=0 event=1 ingressRule=0 originService=http://localhost:3000
+2026-03-26T13:15:39Z ERR Request failed error="Incoming request ended abruptly: context canceled" connIndex=0 dest=https://cute-slim-building-coordinates.trycloudflare.com/ event=0 ip=198.41.200.23 type=http
+2026-03-26T13:25:39Z ERR Failed to refresh DNS local resolver error="lookup region1.v2.argotunnel.com: i/o timeout"

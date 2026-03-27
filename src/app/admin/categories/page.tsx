@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Box, Text, HStack, NativeSelect } from "@chakra-ui/react";
+import { Box, Text, HStack, Grid } from "@chakra-ui/react";
 import {
   T,
   PageHeader,
@@ -14,6 +14,7 @@ import {
   FormField,
   FieldError,
   InputField,
+  SelectField,
   AdminModal,
   AdminLoader,
 } from "@/components/admin/ui";
@@ -35,19 +36,6 @@ interface CategoryData {
   _count?: { products: number };
   children?: CategoryData[];
 }
-
-const selectStyle: React.CSSProperties = {
-  width: "100%",
-  padding: "8px 12px",
-  border: `1px solid ${T.border}`,
-  borderRadius: 8,
-  fontSize: 13,
-  background: "white",
-  color: T.text,
-  fontFamily: "inherit",
-  outline: "none",
-  height: 38,
-};
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<CategoryData[]>([]);
@@ -190,7 +178,7 @@ export default function CategoriesPage() {
   if (loading) return <AdminLoader message="Loading categories..." />;
 
   return (
-    <Box bg={T.bg} minH="100%" p={6}>
+    <Box bg={T.bg} minH="100%" p={{ base: 4, md: 6 }}>
       <PageHeader
         title="Categories"
         subtitle="Manage product categories and subcategories"
@@ -201,7 +189,7 @@ export default function CategoriesPage() {
       </PageHeader>
 
       <>
-        <HStack gap={4} mb={5}>
+        <Grid templateColumns={{ base: "repeat(2,1fr)", md: "repeat(3,1fr)" }} gap={4} mb={5}>
             <StatCard label="Total Categories" value={total} />
             <StatCard
               label="Subcategories"
@@ -213,7 +201,7 @@ export default function CategoriesPage() {
               value={totalProducts}
               color={T.green}
             />
-          </HStack>
+          </Grid>
 
           <TableShell
             footerText={`${total} parent categories, ${totalSubcategories} subcategories`}
@@ -251,10 +239,10 @@ export default function CategoriesPage() {
                         px={2.5}
                         py={1}
                         borderRadius="6px"
-                        bg="#eff6ff"
-                        border="1px solid #bfdbfe"
+                        bg={T.blueBg}
+                        border={`1px solid ${T.border}`}
                       >
-                        <Text fontSize="11.5px" fontWeight={600} color="#1d4ed8">
+                        <Text fontSize="11.5px" fontWeight={600} color={T.blueText}>
                           Parent
                         </Text>
                       </Box>
@@ -409,21 +397,15 @@ export default function CategoriesPage() {
 
           {/* Brand */}
           <FormField label="Brand (optional)">
-            <NativeSelect.Root>
-              <NativeSelect.Field
-                style={selectStyle}
-                value={brandId}
-                onChange={(e) => setBrandId(e.target.value)}
-              >
-                <option value="">— No brand —</option>
-                {brands.map((b) => (
-                  <option key={b.id} value={b.id}>
-                    {b.name}
-                  </option>
-                ))}
-              </NativeSelect.Field>
-              <NativeSelect.Indicator />
-            </NativeSelect.Root>
+            <SelectField
+              options={[
+                { value: "", label: "— No brand —" },
+                ...brands.map((b) => ({ value: b.id, label: b.name }))
+              ]}
+              value={brandId}
+              onChange={(e) => setBrandId(e.target.value)}
+              placeholder="Select brand..."
+            />
           </FormField>
 
           {/* Parent Category */}
@@ -431,21 +413,15 @@ export default function CategoriesPage() {
             label="Parent Category (optional — leave empty for top-level)"
             mb={0}
           >
-            <NativeSelect.Root>
-              <NativeSelect.Field
-                style={selectStyle}
-                value={parentId}
-                onChange={(e) => setParentId(e.target.value)}
-              >
-                <option value="">— None (Top-level category) —</option>
-                {parentOptions.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
-                ))}
-              </NativeSelect.Field>
-              <NativeSelect.Indicator />
-            </NativeSelect.Root>
+            <SelectField
+              options={[
+                { value: "", label: "— None (Top-level category) —" },
+                ...parentOptions.map((p) => ({ value: p.id, label: p.name }))
+              ]}
+              value={parentId}
+              onChange={(e) => setParentId(e.target.value)}
+              placeholder="Select parent category..."
+            />
             <Text fontSize="11.5px" color={T.sub} mt={1.5}>
               Select a parent to make this a subcategory (e.g. &quot;Bella&quot;
               → &quot;Diamond Collection&quot;)

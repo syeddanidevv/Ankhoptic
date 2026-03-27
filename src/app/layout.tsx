@@ -6,6 +6,7 @@ import "../../public/store/fonts/fonts.css";
 import { Toaster } from "react-hot-toast";
 import MetaPixel from "@/components/MetaPixel";
 import { prisma } from "@/lib/db";
+import NextTopLoader from "nextjs-toploader";
 
 export const metadata: Metadata = {
   title: "Ankhoptics - Premium Eye Lenses",
@@ -30,6 +31,18 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body suppressHydrationWarning>
+        <NextTopLoader
+          color="#ffffff"
+          initialPosition={0.08}
+          crawlSpeed={200}
+          height={4}
+          crawl={true}
+          showSpinner={false}
+          easing="ease"
+          speed={200}
+          shadow="0 0 10px #ffffff,0 0 5px #ffffff"
+          zIndex={1600000000}
+        />
         <MetaPixel pixelId={pixelSetting?.value} />
         <Suspense fallback={null}>{children}</Suspense>
         <Toaster position="top-right" />

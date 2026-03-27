@@ -69,7 +69,7 @@ export const authOptions: NextAuthOptions = {
         if (!customer?.password) return null;
         const valid = await bcrypt.compare(credentials.password, customer.password);
         if (!valid) return null;
-        return { id: customer.id, email: customer.email, name: customer.name, userType: "customer" } as never;
+        return { id: customer.id, email: customer.email, name: customer.name, userType: "customer" } as unknown as { id: string; email: string; name: string; userType: string };
       },
     }),
   ],

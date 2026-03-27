@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import {
-  Box, Text, HStack, Flex,
+  Box, Text, HStack, Grid, Flex,
 } from "@chakra-ui/react";
 import {
   T, PageHeader, StatCard, TabBar, FilterBar,
@@ -185,18 +185,18 @@ export default function InventoryPage() {
 
 
   return (
-    <Box bg={T.bg} minH="100%" p={6}>
+    <Box bg={T.bg} minH="100%" p={{ base: 4, md: 6 }}>
       <PageHeader title="Inventory" subtitle="Track and manage product stock levels in real-time">
         <AdminButton variant="secondary" size="sm" onClick={fetch_}>Refresh</AdminButton>
       </PageHeader>
 
       {/* Stats */}
-      <HStack gap={4} mb={5} flexWrap="wrap">
+      <Grid templateColumns={{ base: "repeat(2,1fr)", md: "repeat(4,1fr)" }} gap={4} mb={5}>
         <StatCard label="Total Products"  value={stats.total}      />
         <StatCard label="Total Units"     value={stats.totalUnits} />
         <StatCard label="Low Stock"       value={stats.low}  color={T.warn} />
         <StatCard label="Out of Stock"    value={stats.out}  color={T.red}  />
-      </HStack>
+      </Grid>
 
       {loading ? (
         <Flex justify="center" py={20} direction="column" align="center" gap={3}>

@@ -24,8 +24,7 @@ function LinkPicker({ value, onChange }: { value: string; onChange: (v: string) 
 
   useEffect(() => {
     if (mode === "custom") return;
-    // setLoading deferred to avoid triggering cascading renders in the effect body
-    Promise.resolve().then(() => setLoading(true));
+    setLoading(true);
     if (mode === "category") {
       fetch("/api/categories?flat=1")
         .then((r) => r.json())
@@ -555,12 +554,57 @@ function MessagesSection({
   );
 }
 
+/* ─── Free Shipping Threshold Section ─── */
+function FreeShippingSection({
+  threshold,
+  onChange,
+  onSave,
+}: {
+  threshold: number;
+  onChange: (v: number) => void;
+  onSave: () => void;
+}) {
+  const [saving, setSaving] = useState(false);
+  return (
+    <SectionCard title="Free Shipping Threshold">
+      <Box p={3} borderTop={`1px solid ${T.border}`}>
+        <Text fontSize="13px" mb={3} color={T.muted}>
+          Amount in PKR above which shipping becomes free.
+        </Text>
+        <HStack gap={2}>
+          <Box flex={1}>
+            <InputField
+              placeholder="e.g. 5000"
+              value={threshold || ""}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange(Number(e.target.value) || 0)}
+              type="number"
+            />
+          </Box>
+          <AdminButton
+            variant="primary"
+            size="sm"
+            onClick={async () => {
+              setSaving(true);
+              await onSave();
+              setSaving(false);
+            }}
+            disabled={saving}
+          >
+            {saving ? "Saving…" : "Save changes"}
+          </AdminButton>
+        </HStack>
+      </Box>
+    </SectionCard>
+  );
+}
+
 /* ─── Main Page ─── */
 export default function StoreSettingsPage() {
   const [slides,    setSlides]    = useState<Slide[]>([]);
   const [messages,  setMessages]  = useState<string[]>([]);
   const [sliderCfg, setSliderCfg] = useState<SliderSettings>(SLIDER_DEFAULTS);
   const [logo,      setLogo]      = useState("/store/images/logo/logo.jpg");
+  const [shippingThreshold, setShippingThreshold] = useState(5000);
   const [loading,   setLoading]   = useState(true);
 
   useEffect(() => {
@@ -571,6 +615,9 @@ export default function StoreSettingsPage() {
         setMessages(d.announcement_messages ?? []);
         setSliderCfg({ ...SLIDER_DEFAULTS, ...(d.slider_settings ?? {}) });
         if (d.store_logo) setLogo(d.store_logo);
+        if (d.free_shipping_threshold !== undefined) {
+          setShippingThreshold(Number(d.free_shipping_threshold) || 5000);
+        }
       })
       .catch(() => toast.error("Failed to load settings"))
       .finally(() => setLoading(false));
@@ -642,6 +689,13 @@ export default function StoreSettingsPage() {
               messages={messages}
               onChange={setMessages}
               onSave={() => saveKey("announcement_messages", messages)}
+            />
+          </Box>
+          <Box mt={4}>
+            <FreeShippingSection
+              threshold={shippingThreshold}
+              onChange={setShippingThreshold}
+              onSave={() => saveKey("free_shipping_threshold", shippingThreshold)}
             />
           </Box>
           <Box mt={4}>

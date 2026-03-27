@@ -27,10 +27,13 @@ const DEFAULT_SETTINGS: SliderSettings = {
 };
 
 export default function HeroSlider() {
-  const [slides, setSlides] = useState<{ url: string; alt?: string; link?: string }[]>([]);
+  const [slides, setSlides] = useState<
+    { url: string; alt?: string; link?: string }[]
+  >([]);
   const [cfg, setCfg] = useState<SliderSettings>(DEFAULT_SETTINGS);
   const [ready, setReady] = useState(false);
   const swiperRef = useRef<HTMLDivElement>(null);
+  const paginationRef = useRef<HTMLDivElement>(null);
   // Keep reference to destroy swiper instance on re-init
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const swiperInstanceRef = useRef<any>(null);
@@ -44,10 +47,21 @@ export default function HeroSlider() {
           setSlides(d.hero_slides);
         }
         if (d.slider_settings) {
-          setCfg({ ...DEFAULT_SETTINGS, ...d.slider_settings });
+          setCfg({
+            ...DEFAULT_SETTINGS,
+            ...d.slider_settings,
+            preview: Number(
+              d.slider_settings.preview || DEFAULT_SETTINGS.preview,
+            ),
+            tablet: Number(d.slider_settings.tablet || DEFAULT_SETTINGS.tablet),
+            mobile: Number(d.slider_settings.mobile || DEFAULT_SETTINGS.mobile),
+            space: Number(d.slider_settings.space || DEFAULT_SETTINGS.space),
+            delay: Number(d.slider_settings.delay || DEFAULT_SETTINGS.delay),
+            speed: Number(d.slider_settings.speed || DEFAULT_SETTINGS.speed),
+          });
         }
       })
-      .catch(() => {})
+      .catch((err) => console.error("Slider fetch config error:", err))
       .finally(() => setReady(true));
   }, []);
 
@@ -57,16 +71,20 @@ export default function HeroSlider() {
 
     // Destroy previous instance if it exists
     if (swiperInstanceRef.current) {
-      try { swiperInstanceRef.current.destroy(true, true); } catch (_) {}
+      try {
+        swiperInstanceRef.current.destroy(true, true);
+      } catch {}
       swiperInstanceRef.current = null;
     }
 
-    // Wait for DOM to fully update
-    const timer = setTimeout(() => {
-      if (!swiperRef.current || typeof window === "undefined") return;
+    // Wait for Swiper script to load
+    const swiperInterval = setInterval(() => {
+      if (typeof window === "undefined" || !swiperRef.current) return;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const SwiperCtor = (window as any).Swiper;
-      if (!SwiperCtor) return;
+      if (!SwiperCtor) return; // Keep waiting
+
+      clearInterval(swiperInterval);
 
       const canLoop = cfg.loop && slides.length > cfg.preview;
 
@@ -77,10 +95,16 @@ export default function HeroSlider() {
         speed: cfg.speed,
         centeredSlides: false,
         ...(cfg.autoPlay
-          ? { autoplay: { delay: cfg.delay, disableOnInteraction: false, pauseOnMouseEnter: true } }
+          ? {
+              autoplay: {
+                delay: cfg.delay,
+                disableOnInteraction: false,
+                pauseOnMouseEnter: true,
+              },
+            }
           : { autoplay: false }),
         pagination: {
-          el: swiperRef.current.closest(".tf-slideshow")?.querySelector(".sw-pagination-slider") ?? ".sw-pagination-slider",
+          el: paginationRef.current,
           clickable: true,
         },
         navigation: {
@@ -104,9 +128,11 @@ export default function HeroSlider() {
     }, 100);
 
     return () => {
-      clearTimeout(timer);
+      clearInterval(swiperInterval);
       if (swiperInstanceRef.current) {
-        try { swiperInstanceRef.current.destroy(true, true); } catch (_) {}
+        try {
+          swiperInstanceRef.current.destroy(true, true);
+        } catch {}
         swiperInstanceRef.current = null;
       }
     };
@@ -117,30 +143,30 @@ export default function HeroSlider() {
 
   return (
     <div className="tf-slideshow slider-radius slider-effect-fade position-relative">
-      <div
-        ref={swiperRef}
-        dir="ltr"
-        className="swiper tf-sw-slideshow"
-      >
+      <div ref={swiperRef} dir="ltr" className="swiper tf-sw-slideshow">
         <div className="swiper-wrapper">
           {slides.map((slide, i) => (
             <div key={i} className="swiper-slide">
               {slide.link ? (
                 <a href={slide.link}>
                   <img
-                    className="lazyload w-100"
-                    data-src={slide.url}
+                    className={`${i !== 0 ? "lazyload" : ""} w-100`}
+                    {...(i !== 0 ? { "data-src": slide.url } : {})}
                     src={slide.url}
                     alt={slide.alt ?? `hp-slideshow-0${i + 1}`}
+                    loading={i === 0 ? "eager" : "lazy"}
+                    fetchPriority={i === 0 ? "high" : "auto"}
                     style={{ display: "block", width: "100%", height: "auto" }}
                   />
                 </a>
               ) : (
                 <img
-                  className="lazyload w-100"
-                  data-src={slide.url}
+                  className={`${i !== 0 ? "lazyload" : ""} w-100`}
+                  {...(i !== 0 ? { "data-src": slide.url } : {})}
                   src={slide.url}
                   alt={slide.alt ?? `hp-slideshow-0${i + 1}`}
+                  loading={i === 0 ? "eager" : "lazy"}
+                  fetchPriority={i === 0 ? "high" : "auto"}
                   style={{ display: "block", width: "100%", height: "auto" }}
                 />
               )}
@@ -150,11 +176,7 @@ export default function HeroSlider() {
       </div>
       <div className="wrap-pagination">
         <div className="container">
-          <div className="sw-dots line-white-pagination sw-pagination-slider justify-content-center">
-            {slides.map((_, i) => (
-              <span key={i} className="swiper-pagination-bullet" />
-            ))}
-          </div>
+          <div ref={paginationRef} className="sw-dots line-white-pagination sw-pagination-slider justify-content-center"></div>
         </div>
       </div>
     </div>

@@ -1,18 +1,51 @@
-/* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
+import { prisma } from "@/lib/db";
+import Image from "next/image";
 
-export default function Testimonial() {
+export default async function Testimonial() {
+  const testimonials = await prisma.testimonial.findMany({
+    where: { isActive: true },
+    orderBy: { createdAt: "desc" },
+  });
+
+  if (testimonials.length === 0) {
+    return null; // Or show placeholders if preferred
+  }
+
   return (
     <section className="flat-spacing-4 pt_0">
       <div className="container">
+        {testimonials.length <= 2 && (
+          <style
+            dangerouslySetInnerHTML={{
+              __html: `
+              @media (min-width: 768px) {
+                .center-slider-2 .swiper-wrapper {
+                  justify-content: center;
+                }
+              }
+              .center-slider-1 .swiper-wrapper {
+                justify-content: center;
+              }
+            `,
+            }}
+          />
+        )}
         <div className="flat-title wow fadeInUp" data-wow-delay="0s">
           <span className="title">Testimonials</span>
           <p className="sub-title">
-            Beat the Heat in Style: It&apos;s time to stock up on summer
-            essentials!
+            What our customers are saying about Ankhoptics
           </p>
         </div>
-        <div className="wrap-carousel">
+        <div
+          className={`wrap-carousel ${
+            testimonials.length === 1
+              ? "center-slider-1"
+              : testimonials.length === 2
+                ? "center-slider-2"
+                : ""
+          }`}
+        >
           <div
             dir="ltr"
             className="swiper tf-sw-testimonial"
@@ -23,182 +56,108 @@ export default function Testimonial() {
             data-space-md={15}
           >
             <div className="swiper-wrapper">
-              <div className="swiper-slide">
-                <div
-                  className="testimonial-item style-column wow fadeInUp"
-                  data-wow-delay="0s"
-                >
-                  <div className="rating">
-                    <i className="icon-star" />
-                    <i className="icon-star" />
-                    <i className="icon-star" />
-                    <i className="icon-star" />
-                    <i className="icon-star" />
-                  </div>
-                  <div className="heading">Best Online Fashion Site</div>
-                  <div className="text">
-                    &ldquo; I always find something stylish and affordable on
-                    this web fashion site &rdquo;
-                  </div>
-                  <div className="author">
-                    <div className="name">Robert smith</div>
-                    <div className="metas">Customer from USA</div>
-                  </div>
-                  <div className="product">
-                    <div className="image">
-                      <Link href="#">
-                        <img
-                          className="lazyload"
-                          data-src="/store/images/shop/products/img-p2.png"
-                          src="/store/images/shop/products/img-p2.png"
-                          alt=""
+              {testimonials.map((item, idx) => (
+                <div className="swiper-slide" key={item.id}>
+                  <div
+                    className="testimonial-item style-column wow fadeInUp"
+                    data-wow-delay={`${idx * 0.1}s`}
+                  >
+                    <div className="rating">
+                      {[...Array(5)].map((_, i) => (
+                        <i
+                          key={i}
+                          className="icon-star"
+                          style={{
+                            color: i < item.rating ? "#f59e0b" : "#e2e8f0",
+                          }}
                         />
-                      </Link>
+                      ))}
                     </div>
-                    <div className="content-wrap">
-                      <div className="product-title">
-                        <Link href="#">Jersey thong body</Link>
+                    <div
+                      className="heading"
+                      style={{
+                        fontSize: "1.1rem",
+                        fontWeight: 600,
+                        color: "#111827",
+                        marginTop: "15px",
+                        marginBottom: "10px",
+                      }}
+                    >
+                      {item.heading}
+                    </div>
+                    <div
+                      className="text"
+                      style={{
+                        fontSize: "1rem",
+                        color: "#4b5563",
+                        fontStyle: "italic",
+                        lineHeight: 1.6,
+                        marginBottom: "20px",
+                      }}
+                    >
+                      &ldquo; {item.text} &rdquo;
+                    </div>
+                    <div className="author" style={{ marginTop: "auto" }}>
+                      <div
+                        className="name"
+                        style={{
+                          fontSize: "0.95rem",
+                          fontWeight: 700,
+                          color: "#1f2937",
+                          textTransform: "uppercase",
+                          letterSpacing: "0.5px",
+                        }}
+                      >
+                        {item.authorName}
                       </div>
-                      <div className="price">$105.95</div>
+                      <div
+                        className="metas"
+                        style={{
+                          fontSize: "0.85rem",
+                          color: "#6b7280",
+                          marginTop: "2px",
+                        }}
+                      >
+                        {item.authorMeta || "Customer"}
+                      </div>
                     </div>
-                    <Link href="#" className="">
-                      <i className="icon-arrow1-top-left" />
-                    </Link>
+
+                    {item.productName && (
+                      <div className="product">
+                        <div className="image">
+                          <Link href={item.productLink || "#"}>
+                            <Image
+                              src={
+                                item.image ||
+                                "/store/images/shop/products/img-p2.png"
+                              }
+                              alt={item.productName}
+                              width={400}
+                              height={400}
+                              style={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                              }}
+                            />
+                          </Link>
+                        </div>
+                        <div className="content-wrap">
+                          <div className="product-title">
+                            <Link href={item.productLink || "#"}>
+                              {item.productName}
+                            </Link>
+                          </div>
+                          {/* Price is optional, maybe remove it for now as it's not in our model */}
+                        </div>
+                        <Link href={item.productLink || "#"} className="">
+                          <i className="icon-arrow1-top-left" />
+                        </Link>
+                      </div>
+                    )}
                   </div>
                 </div>
-              </div>
-              <div className="swiper-slide">
-                <div
-                  className="testimonial-item style-column wow fadeInUp"
-                  data-wow-delay=".1s"
-                >
-                  <div className="rating">
-                    <i className="icon-star" />
-                    <i className="icon-star" />
-                    <i className="icon-star" />
-                    <i className="icon-star" />
-                    <i className="icon-star" />
-                  </div>
-                  <div className="heading">Great Selection and Quality</div>
-                  <div className="text">
-                    &quot;I love the variety of styles and the high-quality
-                    clothing on this web fashion site.&quot;
-                  </div>
-                  <div className="author">
-                    <div className="name">Allen Lyn</div>
-                    <div className="metas">Customer from France</div>
-                  </div>
-                  <div className="product">
-                    <div className="image">
-                      <Link href="#">
-                        <img
-                          className="lazyload"
-                          data-src="/store/images/shop/products/img-p3.png"
-                          src="/store/images/shop/products/img-p3.png"
-                          alt=""
-                        />
-                      </Link>
-                    </div>
-                    <div className="content-wrap">
-                      <div className="product-title">
-                        <Link href="#">Cotton jersey top</Link>
-                      </div>
-                      <div className="price">$7.95</div>
-                    </div>
-                    <Link href="#" className="">
-                      <i className="icon-arrow1-top-left" />
-                    </Link>
-                  </div>
-                </div>
-              </div>
-              <div className="swiper-slide">
-                <div
-                  className="testimonial-item style-column wow fadeInUp"
-                  data-wow-delay=".2s"
-                >
-                  <div className="rating">
-                    <i className="icon-star" />
-                    <i className="icon-star" />
-                    <i className="icon-star" />
-                    <i className="icon-star" />
-                    <i className="icon-star" />
-                  </div>
-                  <div className="heading">Best Customer Service</div>
-                  <div className="text">
-                    &quot;I finally found a web fashion site with stylish and
-                    flattering options in my size.&quot;
-                  </div>
-                  <div className="author">
-                    <div className="name">Peter Rope</div>
-                    <div className="metas">Customer from USA</div>
-                  </div>
-                  <div className="product">
-                    <div className="image">
-                      <Link href="#">
-                        <img
-                          className="lazyload"
-                          data-src="/store/images/shop/products/img-p4.png"
-                          src="/store/images/shop/products/img-p4.png"
-                          alt=""
-                        />
-                      </Link>
-                    </div>
-                    <div className="content-wrap">
-                      <div className="product-title">
-                        <Link href="#">Ribbed modal T-shirt</Link>
-                      </div>
-                      <div className="price">From $18.95</div>
-                    </div>
-                    <Link href="#" className="">
-                      <i className="icon-arrow1-top-left" />
-                    </Link>
-                  </div>
-                </div>
-              </div>
-              <div className="swiper-slide">
-                <div
-                  className="testimonial-item style-column wow fadeInUp"
-                  data-wow-delay=".3s"
-                >
-                  <div className="rating">
-                    <i className="icon-star" />
-                    <i className="icon-star" />
-                    <i className="icon-star" />
-                    <i className="icon-star" />
-                    <i className="icon-star" />
-                  </div>
-                  <div className="heading">Great Selection and Quality</div>
-                  <div className="text">
-                    &quot;I love the variety of styles and the high-quality
-                    clothing on this web fashion site.&quot;
-                  </div>
-                  <div className="author">
-                    <div className="name">Hellen Ase</div>
-                    <div className="metas">Customer from Japan</div>
-                  </div>
-                  <div className="product">
-                    <div className="image">
-                      <Link href="#">
-                        <img
-                          className="lazyload"
-                          data-src="/store/images/shop/products/img-p5.png"
-                          src="/store/images/shop/products/img-p5.png"
-                          alt=""
-                        />
-                      </Link>
-                    </div>
-                    <div className="content-wrap">
-                      <div className="product-title">
-                        <Link href="#">Customer from Japan</Link>
-                      </div>
-                      <div className="price">$16.95</div>
-                    </div>
-                    <Link href="#" className="">
-                      <i className="icon-arrow1-top-left" />
-                    </Link>
-                  </div>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
           <div className="sw-dots style-2 sw-pagination-testimonial justify-content-center" />

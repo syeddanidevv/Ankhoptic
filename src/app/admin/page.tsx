@@ -35,6 +35,10 @@ interface DashboardData {
     pay: string;
     date: string;
   }>;
+  revenueChart: number[];
+  ordersChart: number[];
+  customersChart: number[];
+  avgValueChart: number[];
 }
 
 const PAY_STATUS: Record<string, string> = {
@@ -93,7 +97,7 @@ export default function AdminDashboard() {
       sub: "All time",
       up: true,
       color: T.green,
-      sparkline: [2, 3, 1, 4, 3, 5, 2, 4, 3, 5, 4, 6],
+      sparkline: data.revenueChart.some(v => v > 0) ? data.revenueChart : [0],
     },
     {
       label: "Orders",
@@ -101,7 +105,7 @@ export default function AdminDashboard() {
       sub: "Total",
       up: true,
       color: T.blue,
-      sparkline: [1, 2, 3, 2, 4, 3, 5, 4, 3, 5, 4, 6],
+      sparkline: data.ordersChart.some(v => v > 0) ? data.ordersChart : [0],
     },
     {
       label: "Customers",
@@ -109,7 +113,7 @@ export default function AdminDashboard() {
       sub: "All time total",
       up: true,
       color: T.purple,
-      sparkline: [1, 1, 2, 2, 3, 3, 4, 4, 3, 5, 5, 5],
+      sparkline: data.customersChart.some(v => v > 0) ? data.customersChart : [0],
     },
     {
       label: "Avg Order Value",
@@ -117,7 +121,7 @@ export default function AdminDashboard() {
       sub: "per order",
       up: false,
       color: T.warn,
-      sparkline: [5, 4, 3, 4, 3, 2, 3, 2, 3, 2, 3, 2],
+      sparkline: data.avgValueChart.some(v => v > 0) ? data.avgValueChart : [0],
     },
   ];
 
@@ -147,8 +151,12 @@ export default function AdminDashboard() {
         ]}
       />
 
-      {/* Stat cards */}
-      <Flex gap={4} mb={5}>
+      {/* Stat cards — responsive wrapping */}
+      <Grid
+        templateColumns={{ base: "1fr 1fr", md: "repeat(4, 1fr)" }}
+        gap={4}
+        mb={5}
+      >
         {STATS.map((s) => (
           <StatCard
             key={s.label}
@@ -160,9 +168,9 @@ export default function AdminDashboard() {
             sparkline={s.sparkline}
           />
         ))}
-      </Flex>
+      </Grid>
 
-      <Grid templateColumns="1fr 300px" gap={4}>
+      <Grid templateColumns={{ base: "1fr", xl: "1fr 300px" }} gap={4}>
         {/* Recent orders table */}
         <GridItem>
           <TableShell
@@ -174,7 +182,7 @@ export default function AdminDashboard() {
                 align="center"
                 px={4}
                 py={3.5}
-                borderBottom={`1px solid #f8fafc`}
+                borderBottom={`1px solid ${T.divider}`}
               >
                 <Text fontSize="14px" fontWeight={600} color={T.text}>
                   Recent Orders

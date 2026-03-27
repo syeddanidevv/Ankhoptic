@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, Suspense } from "react";
 import Image from "next/image";
-import { Box, Text, HStack, Checkbox, Flex } from "@chakra-ui/react";
+import { Box, Text, Grid, Checkbox, Flex } from "@chakra-ui/react";
 import NextLink from "next/link";
 import {
   T,
@@ -112,7 +112,7 @@ function ProductsPageContent() {
   if (loading) return <AdminLoader message="Loading products..." />;
 
   return (
-    <Box bg={T.bg} minH="100%" p={6}>
+    <Box bg={T.bg} minH="100%" p={{ base: 4, md: 6 }}>
       <PageHeader title="Products" subtitle={`${total} products total`}>
         <AdminButton variant="secondary">Export</AdminButton>
         <NextLink href="/admin/products/bulk-upload">
@@ -123,7 +123,7 @@ function ProductsPageContent() {
         </NextLink>
       </PageHeader>
 
-      <HStack gap={4} mb={5}>
+      <Grid templateColumns={{ base: "repeat(2,1fr)", md: "repeat(4,1fr)" }} gap={4} mb={5}>
         <StatCard label="Total Products" value={total} />
         <StatCard
           label="Active"
@@ -142,7 +142,7 @@ function ProductsPageContent() {
           value={products.filter((p) => p.stockCount === 0).length}
           color={T.red}
         />
-      </HStack>
+      </Grid>
 
       <TableShell
         footerText={`Showing ${products.length} of ${total} products`}

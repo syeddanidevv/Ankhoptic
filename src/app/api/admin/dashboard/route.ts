@@ -14,6 +14,17 @@ export async function GET() {
       select: { total: true, createdAt: true },
     });
     
+    // For sparkline data (last 12 days)
+    const dateArray = Array.from({ length: 12 }, (_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() - (11 - i));
+      d.setHours(0, 0, 0, 0);
+      return d.getTime();
+    });
+
+    const revenueChart = new Array(12).fill(0);
+    const ordersChart = new Array(12).fill(0);
+
     // Revenue calculations
     let totalRevenue = 0;
     let todayRevenue = 0;
@@ -25,12 +36,31 @@ export async function GET() {
         todayRevenue += o.total;
         todayOrdersCount++;
       }
+      
+      const odrDate = new Date(o.createdAt).setHours(0, 0, 0, 0);
+      const idx = dateArray.indexOf(odrDate);
+      if (idx !== -1) {
+        revenueChart[idx] += o.total;
+        ordersChart[idx] += 1;
+      }
     }
 
     const totalOrders = allOrders.length;
     
     // Customers (from customer table + guest emails?) We'll just count customers.
-    const totalCustomers = await prisma.customer.count();
+    const allCustomers = await prisma.customer.findMany({ select: { createdAt: true } });
+    const totalCustomers = allCustomers.length;
+    
+    const customersChart = new Array(12).fill(0);
+    for (const c of allCustomers) {
+      const cDate = new Date(c.createdAt).setHours(0, 0, 0, 0);
+      const idx = dateArray.indexOf(cDate);
+      if (idx !== -1) {
+        customersChart[idx] += 1;
+      }
+    }
+    
+    const avgValueChart = revenueChart.map((r, i) => ordersChart[i] > 0 ? Math.round(r / ordersChart[i]) : 0);
 
     // Pending Unfulfilled
     const unfulfilledCount = await prisma.order.count({
@@ -56,8 +86,8 @@ export async function GET() {
     });
 
     const recentOrders = recentOrdersRaw.map(o => ({
-      id: `#${o.orderNumber}`,
-      customer: o.customer?.name || o.guestName || "Guest",
+      id: `#${1000 + o.orderNumber}`,
+      customer: o.customer?.name || (o.shippingAddress as any)?.name || "Guest",
       total: `Rs ${o.total.toLocaleString()}`,
       items: o.items.length,
       status: o.fulfillmentStatus,
@@ -75,7 +105,11 @@ export async function GET() {
       avgOrderValue: totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0,
       unfulfilled: unfulfilledCount,
       codPending: codPendingCount,
-      recentOrders
+      recentOrders,
+      revenueChart,
+      ordersChart,
+      customersChart,
+      avgValueChart,
     });
 
   } catch (error) {

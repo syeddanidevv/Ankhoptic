@@ -1,15 +1,16 @@
 import type { Metadata } from "next";
-import Script from "next/script";
+
 import Header from "@/components/store/Header";
 import Footer from "@/components/store/Footer";
 import AnnouncementBar from "@/components/store/AnnouncementBar";
 import ToolbarBottom from "@/components/store/ToolbarBottom";
 import CanvasSearch from "@/components/store/CanvasSearch";
-import Cart from "@/components/store/Cart";
+import Cart from "@/components/store/modals/CartModal";
 import Login from "@/components/store/modals/Login";
 import StoreProvider from "@/components/store/StoreProvider";
 import QuickAdd from "@/components/store/modals/QuickAdd";
-import QuickView from "@/components/store/modals/QuickView";
+import WhatsAppFloat from "@/components/store/WhatsAppFloat";
+import TemplateScripts from "@/components/TemplateScripts";
 
 export const metadata: Metadata = {
   title: "Ankhoptics — Premium Contact Lenses Pakistan",
@@ -42,30 +43,12 @@ export default function StoreLayout({
       <Cart />
       <Login />
       <QuickAdd />
-      <QuickView />
       <CanvasSearch />
       <ToolbarBottom />
+      <WhatsAppFloat />
       <Footer />
-      {/* ── Bootstrap Template JS (load after body) ── */}
-      <Script src="/store/js/jquery.min.js" strategy="beforeInteractive" />
-      <Script src="/store/js/bootstrap.min.js" strategy="afterInteractive" />
-      <Script
-        src="/store/js/swiper-bundle.min.js"
-        strategy="afterInteractive"
-      />
-      <Script src="/store/js/wow.min.js" strategy="afterInteractive" />
-      <Script src="/store/js/lazysize.min.js" strategy="afterInteractive" />
-      <Script
-        src="/store/js/magnific-popup.min.js"
-        strategy="afterInteractive"
-      />
-      <Script
-        src="/store/js/bootstrap-select.min.js"
-        strategy="afterInteractive"
-      />
-      <Script src="/store/js/carousel.js" strategy="afterInteractive" />
-      <Script src="/store/js/count-down.js" strategy="afterInteractive" />
-      <Script src="/store/js/main.js" strategy="afterInteractive" />
+      {/* ── Bootstrap Template JS (Loaded safely via Client Component) ── */}
+      <TemplateScripts />
     </StoreProvider>
   );
 }

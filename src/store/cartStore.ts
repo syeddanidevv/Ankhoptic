@@ -2,17 +2,19 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 export interface CartItem {
-  id:         string;   /* unique cart item id: slug+lensType+power */
-  slug:       string;
-  title:      string;
-  brand:      string;
-  color:      string;
-  lensType:   "PLAIN" | "EYESIGHT";
-  power:      string | null;
-  addonName:  string;
-  addonPrice: number;
-  unitPrice:  number;
-  qty:        number;
+  id:               string;   /* unique cart item id: slug+lensType+power */
+  slug:             string;
+  title:            string;
+  image:            string;   /* product thumbnail */
+  brand:            string;
+  color:            string;
+  lensType:         "PLAIN" | "EYESIGHT";
+  power:            string | null;
+  prescriptionName: string | null; /* uploaded file name */
+  addonName:        string;
+  addonPrice:       number;
+  unitPrice:        number;
+  qty:              number;
 }
 
 interface CartStore {
