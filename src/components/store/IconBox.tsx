@@ -5,9 +5,8 @@ export default function IconBox() {
     { icon: "icon-suport",        title: "Support",        desc: "24/7 support for all your needs" },
     { icon: "icon-return-order",  title: "Return",         desc: "Easy returns within 7 days" },
   ];
-
   return (
-    <section className="flat-spacing-1 has-line-bottom flat-iconbox">
+    <section className="flat-spacing-5 has-line-bottom flat-iconbox">
       <style>{`
         .iconbox-grid {
           display: grid;

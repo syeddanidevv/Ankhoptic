@@ -134,7 +134,7 @@ export default function TopTrending() {
   const [first, ...rest] = products;
 
   return (
-    <section className="flat-spacing-5 pt_0">
+    <section className="flat-spacing-5">
       <div className="container">
         <div className="flat-animate-tab">
           <div className="flat-title wow fadeInUp" data-wow-delay="0s">

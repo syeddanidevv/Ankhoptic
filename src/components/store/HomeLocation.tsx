@@ -1,6 +1,6 @@
 export default async function HomeLocation() {
   return (
-    <section className="flat-spacing-14 ">
+    <section className="flat-spacing-5 ">
       <div className="container">
         <div className="flat-location">
           <div className="banner-map">

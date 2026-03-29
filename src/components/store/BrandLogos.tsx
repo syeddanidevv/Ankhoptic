@@ -7,7 +7,7 @@ export default function BrandLogos() {
   ];
 
   return (
-    <section className="flat-spacing-12 pt_0">
+    <section className="flat-spacing-5">
       <div className="container">
         <div className="flat-title wow fadeInUp" data-wow-delay="0s">
           <span className="title fw-6">Our Brands</span>
@@ -25,17 +25,17 @@ export default function BrandLogos() {
             <div
               key={brand.name}
               style={{
-                flex: "1 1 160px",
-                maxWidth: 200,
-                minWidth: 130,
+                flex: "1 1 200px",
+                maxWidth: 260,
+                minWidth: 150,
                 border: "1px solid #e5e7eb",
                 borderRadius: 12,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                padding: "22px 28px",
+                padding: "16px 20px",
                 background: "#fff",
-                minHeight: 110,
+                minHeight: 140,
               }}
             >
               {brand.logo ? (
@@ -43,7 +43,7 @@ export default function BrandLogos() {
                   src={brand.logo}
                   alt={brand.name}
                   style={{
-                    maxHeight: 90,
+                    maxHeight: 115,
                     maxWidth: "100%",
                     objectFit: "contain",
                   }}
@@ -51,7 +51,7 @@ export default function BrandLogos() {
               ) : (
                 <span
                   style={{
-                    fontSize: 18,
+                    fontSize: 22,
                     fontWeight: 700,
                     color: "#1e2d5a",
                     textAlign: "center",

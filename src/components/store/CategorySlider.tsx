@@ -30,7 +30,7 @@ export default async function CategorySlider() {
   if (categories.length === 0) return null;
 
   return (
-    <section className="flat-spacing-9">
+    <section className="flat-spacing-5">
       <style>{`
         .category-card {
           display: flex;

@@ -13,7 +13,7 @@ export default async function Testimonial() {
   }
 
   return (
-    <section className="flat-spacing-4 pt_0">
+    <section className="flat-spacing-5">
       <div className="container">
         {testimonials.length <= 2 && (
           <style
