@@ -52,7 +52,8 @@ export async function PATCH(
       include: { brand: true, category: true },
     });
     return NextResponse.json(product);
-  } catch {
+  } catch (e) {
+    console.error("Failed to update product:", e);
     return NextResponse.json({ error: "Failed to update product" }, { status: 500 });
   }
 }

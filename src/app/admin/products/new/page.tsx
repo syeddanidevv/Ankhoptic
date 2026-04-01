@@ -234,15 +234,13 @@ function ProductForm() {
       const finalImages = [...images, ...uploadedUrls];
 
       const isLens = form.productType === "LENS";
-      const payload = {
+      const payload: any = {
         title: form.title,
         slug: form.slug || toSlug(form.title),
         description: form.description || null,
-        productType: form.productType,
         price: parseFloat(form.price),
         comparePrice: form.comparePrice ? parseFloat(form.comparePrice) : null,
         color: isLens && form.color ? form.color.toUpperCase() : null,
-        disposability: isLens ? form.disposability : null,
         images: finalImages,
         inStock: form.inStock,
         stockCount: parseInt(form.stockCount || "0"),
@@ -251,6 +249,10 @@ function ProductForm() {
         brandId: form.brandId || null,
         categoryId: form.categoryId || null,
       };
+
+      if (isLens && form.disposability) {
+        payload.disposability = form.disposability;
+      }
 
       let productId = editId;
 
