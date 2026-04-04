@@ -70,6 +70,11 @@ export default function ProductPage({ slug }: { slug: string }) {
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [reviewFeedback, setReviewFeedback] = useState<{ type: "success" | "error"; msg: string } | null>(null);
 
+  const [reviewImageFile, setReviewImageFile] = useState<File | null>(null);
+  const [reviewImagePreview, setReviewImagePreview] = useState<string | null>(null);
+  const [reviewUploadProgress, setReviewUploadProgress] = useState(0);
+  const reviewFileInputRef = React.useRef<HTMLInputElement>(null);
+
   // Auto-fill review name if user is logged in
   useEffect(() => {
     if (session?.user?.name) {
@@ -196,6 +201,27 @@ export default function ProductPage({ slug }: { slug: string }) {
     setReviewSubmitting(true);
     setReviewFeedback(null);
     try {
+      let finalImageUrl = "";
+      if (reviewImageFile) {
+        setReviewUploadProgress(0);
+        finalImageUrl = await new Promise<string>((resolve, reject) => {
+          const fd = new FormData();
+          fd.append("file", reviewImageFile);
+          const xhr = new XMLHttpRequest();
+          xhr.upload.onprogress = (e) => {
+            if (e.lengthComputable) setReviewUploadProgress(Math.round((e.loaded / e.total) * 100));
+          };
+          xhr.onload = () => {
+            if (xhr.status >= 200 && xhr.status < 300) {
+              try { resolve(JSON.parse(xhr.responseText).url); } catch { reject(new Error("Invalid upload response")); }
+            } else { reject(new Error("Upload failed")); }
+          };
+          xhr.onerror = () => reject(new Error("Network error"));
+          xhr.open("POST", "/api/upload");
+          xhr.send(fd);
+        });
+      }
+
       const res = await fetch(`/api/store/products/${slug}/reviews`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -205,6 +231,7 @@ export default function ProductPage({ slug }: { slug: string }) {
           heading: reviewHeading,
           text: reviewText,
           customerMeta: reviewCustomerMeta,
+          image: finalImageUrl || null,
         }),
       });
       const data = await res.json();
@@ -215,6 +242,9 @@ export default function ProductPage({ slug }: { slug: string }) {
       setReviewText("");
       setReviewCustomerMeta("");
       setReviewRating(5);
+      setReviewImageFile(null);
+      setReviewImagePreview(null);
+      if (reviewFileInputRef.current) reviewFileInputRef.current.value = "";
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Failed to submit";
       setReviewFeedback({ type: "error", msg });
@@ -1096,6 +1126,34 @@ export default function ProductPage({ slug }: { slug: string }) {
                             <label className="fw-5 mb-1">Review Text</label>
                             <textarea className="form-control" rows={4} value={reviewText} onChange={(e) => setReviewText(e.target.value)} required></textarea>
                           </div>
+                          <div className="form-group mb-3">
+                            <label className="fw-5 mb-1">Image (Optional)</label>
+                            <input 
+                              type="file" 
+                              className="form-control" 
+                              accept="image/*"
+                              ref={reviewFileInputRef}
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  setReviewImageFile(file);
+                                  setReviewImagePreview(URL.createObjectURL(file));
+                                } else {
+                                  setReviewImageFile(null);
+                                  setReviewImagePreview(null);
+                                }
+                              }}
+                            />
+                            {reviewImagePreview && (
+                              <div className="mt-2 position-relative" style={{ width: "80px", height: "80px" }}>
+                                <Image src={reviewImagePreview} alt="Preview" fill style={{ objectFit: "cover", borderRadius: "8px" }} />
+                                <button type="button" className="btn btn-sm btn-danger position-absolute top-0 end-0" onClick={() => { setReviewImageFile(null); setReviewImagePreview(null); if (reviewFileInputRef.current) reviewFileInputRef.current.value = ""; }} style={{ padding: "0px 6px", transform: "translate(25%, -25%)", borderRadius: "50%" }}>&times;</button>
+                              </div>
+                            )}
+                            {reviewSubmitting && reviewUploadProgress > 0 && reviewUploadProgress < 100 && reviewImageFile && (
+                              <div className="progress mt-2" style={{ height: "10px" }}><div className="progress-bar" style={{ width: `${reviewUploadProgress}%` }}></div></div>
+                            )}
+                          </div>
                           <button className="tf-btn btn-fill justify-content-center mt-3" onClick={submitReview} disabled={reviewSubmitting}>
                             {reviewSubmitting ? "Submitting..." : "Submit Review"}
                           </button>
@@ -1123,6 +1181,11 @@ export default function ProductPage({ slug }: { slug: string }) {
                               </div>
                               {rev.heading && <h6 className="mb-2 fw-6">{rev.heading}</h6>}
                               {rev.text && <p>{rev.text}</p>}
+                              {rev.image && (
+                                <div className="mt-2" style={{ width: "80px", height: "80px", position: "relative" }}>
+                                  <Image src={rev.image} alt="Review Image" fill style={{ objectFit: "cover", borderRadius: "6px" }} />
+                                </div>
+                              )}
                             </div>
                           ))
                         ) : (
