@@ -1004,6 +1004,12 @@ export default function ProductPage({ slug }: { slug: string }) {
                     <span className="inner">Description</span>
                   </li>
                   <li
+                    className={`item-title ${activeTab === "Additional Information" ? "active" : ""}`}
+                    onClick={() => setActiveTab("Additional Information")}
+                  >
+                    <span className="inner">Additional Information</span>
+                  </li>
+                  <li
                     className={`item-title ${activeTab === "Review" ? "active" : ""}`}
                     onClick={() => setActiveTab("Review")}
                   >
@@ -1023,24 +1029,47 @@ export default function ProductPage({ slug }: { slug: string }) {
                   </li>
                 </ul>
                 <div className="widget-content-tab">
-                  <div
-                    className={`widget-content-inner ${activeTab === "Description" ? "active" : ""}`}
-                  >
+                  {/* DESCRIPTION TAB */}
+                  <div className={`widget-content-inner ${activeTab === "Description" ? "active" : ""}`}>
                     <div className="">
                       {product.description ? (
-                        <div
-                          dangerouslySetInnerHTML={{
-                            __html: product.description,
-                          }}
-                        />
+                        <div dangerouslySetInnerHTML={{ __html: product.description }} />
                       ) : (
                         <p>No description available.</p>
                       )}
                     </div>
                   </div>
-                  <div
-                    className={`widget-content-inner ${activeTab === "Review" ? "active" : ""}`}
-                  >
+
+                  {/* ADDITIONAL INFORMATION TAB */}
+                  <div className={`widget-content-inner ${activeTab === "Additional Information" ? "active" : ""}`}>
+                    <table className="tf-pr-attrs">
+                      <tbody>
+                        <tr className="tf-attr-pa-color">
+                          <th className="tf-attr-label">Brand</th>
+                          <td className="tf-attr-value">
+                            <p>{product.brand?.name || "N/A"}</p>
+                          </td>
+                        </tr>
+                        <tr className="tf-attr-pa-size">
+                          <th className="tf-attr-label">Category</th>
+                          <td className="tf-attr-value">
+                            <p>{product.category?.name || "N/A"}</p>
+                          </td>
+                        </tr>
+                        {product.disposability && (
+                          <tr className="tf-attr-pa-color">
+                            <th className="tf-attr-label">Disposability</th>
+                            <td className="tf-attr-value">
+                              <p>{DISPOSABILITY_LABELS[product.disposability] || product.disposability}</p>
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* REVIEW TAB */}
+                  <div className={`widget-content-inner ${activeTab === "Review" ? "active" : ""}`}>
                     <div className="tab-reviews write-cancel-review-wrap">
                       <div className="tab-reviews-heading">
                         <div className="top">
@@ -1058,16 +1087,20 @@ export default function ProductPage({ slug }: { slug: string }) {
                             <p>({totalReviews} Ratings)</p>
                           </div>
                           <div className="rating-score">
-                            {[5, 4, 3, 2, 1].map((stars) => (
-                              <div className="item" key={stars}>
-                                <div className="number-1 text-caption-1">{stars}</div>
-                                <i className="icon icon-star" style={{ color: "#ffc107" }}></i>
-                                <div className="line-bg">
-                                  <div style={{ width: `${getRatingPercent(stars)}%` }}></div>
+                            {[5, 4, 3, 2, 1].map((stars) => {
+                              const percent = getRatingPercent(stars);
+                              const count = getRatingCount(stars);
+                              return (
+                                <div className="item" key={stars}>
+                                  <div className="number-1 text-caption-1">{stars}</div>
+                                  <i className="icon icon-star" style={{ color: "#ffc107" }} />
+                                  <div className="line-bg">
+                                    <div style={{ width: `${percent}%` }} />
+                                  </div>
+                                  <div className="number-2 text-caption-1">{count}</div>
                                 </div>
-                                <div className="number-2 text-caption-1">{getRatingCount(stars)}</div>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
                         </div>
                         <div>
@@ -1087,117 +1120,176 @@ export default function ProductPage({ slug }: { slug: string }) {
                         </div>
                       </div>
 
-                      {/* Write Review Form */}
-                      {isWritingReview && session && (
-                        <div className="reply-comment form-review mt-4" style={{ display: "block", background: "#f9f9f9", padding: 20, borderRadius: 8 }}>
-                          <h5 className="mb-3">Submit your review</h5>
+                      {isWritingReview && session ? (
+                        <form className="form-write-review write-review-wrap mt-4 mb-4" onSubmit={(e) => { e.preventDefault(); submitReview(); }}>
+                          <div className="heading">
+                            <h5>Write a review:</h5>
+                            <div className="list-rating-check">
+                              {[5, 4, 3, 2, 1].map((val) => (
+                                <React.Fragment key={val}>
+                                  <input
+                                    type="radio"
+                                    id={`star${val}`}
+                                    name="rate"
+                                    value={val}
+                                    checked={reviewRating === val}
+                                    onChange={() => setReviewRating(val)}
+                                  />
+                                  <label htmlFor={`star${val}`} title="text" />
+                                </React.Fragment>
+                              ))}
+                            </div>
+                          </div>
                           {reviewFeedback && (
                             <div className={`alert ${reviewFeedback.type === "success" ? "alert-success" : "alert-danger"} mb-3`} style={{ padding: "10px", borderRadius: "5px" }}>
                               {reviewFeedback.msg}
                             </div>
                           )}
-                          <div className="form-group mb-3">
-                            <label className="fw-5 mb-1">Your Name *</label>
-                            <input type="text" className="form-control" value={reviewName} onChange={(e) => setReviewName(e.target.value)} required readOnly style={{ backgroundColor: "#eaeaea" }} />
-                            <small className="text-muted">Auto-filled from your profile</small>
-                          </div>
-                          <div className="form-group mb-3">
-                            <label className="fw-5 mb-1">Customer Label (e.g. Verified Buyer)</label>
-                            <input type="text" className="form-control" value={reviewCustomerMeta} onChange={(e) => setReviewCustomerMeta(e.target.value)} />
-                          </div>
-                          <div className="form-group mb-3">
-                            <label className="fw-5 mb-1">Rating *</label>
-                            <div className="d-flex align-items-center gap-2">
-                              {[1, 2, 3, 4, 5].map((val) => (
-                                <i
-                                  key={val}
-                                  className={`icon icon-star`}
-                                  style={{ fontSize: 24, cursor: "pointer", color: val <= reviewRating ? "#ffc107" : "#e0e0e0" }}
-                                  onClick={() => setReviewRating(val)}
-                                />
-                              ))}
-                            </div>
-                          </div>
-                          <div className="form-group mb-3">
-                            <label className="fw-5 mb-1">Review Title</label>
-                            <input type="text" className="form-control" value={reviewHeading} onChange={(e) => setReviewHeading(e.target.value)} />
-                          </div>
-                          <div className="form-group mb-3">
-                            <label className="fw-5 mb-1">Review Text</label>
-                            <textarea className="form-control" rows={4} value={reviewText} onChange={(e) => setReviewText(e.target.value)} required></textarea>
-                          </div>
-                          <div className="form-group mb-3">
-                            <label className="fw-5 mb-1">Image (Optional)</label>
-                            <input 
-                              type="file" 
-                              className="form-control" 
-                              accept="image/*"
-                              ref={reviewFileInputRef}
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) {
-                                  setReviewImageFile(file);
-                                  setReviewImagePreview(URL.createObjectURL(file));
-                                } else {
-                                  setReviewImageFile(null);
-                                  setReviewImagePreview(null);
-                                }
-                              }}
-                            />
-                            {reviewImagePreview && (
-                              <div className="mt-2 position-relative" style={{ width: "80px", height: "80px" }}>
-                                <Image src={reviewImagePreview} alt="Preview" fill style={{ objectFit: "cover", borderRadius: "8px" }} />
-                                <button type="button" className="btn btn-sm btn-danger position-absolute top-0 end-0" onClick={() => { setReviewImageFile(null); setReviewImagePreview(null); if (reviewFileInputRef.current) reviewFileInputRef.current.value = ""; }} style={{ padding: "0px 6px", transform: "translate(25%, -25%)", borderRadius: "50%" }}>&times;</button>
-                              </div>
-                            )}
-                            {reviewSubmitting && reviewUploadProgress > 0 && reviewUploadProgress < 100 && reviewImageFile && (
-                              <div className="progress mt-2" style={{ height: "10px" }}><div className="progress-bar" style={{ width: `${reviewUploadProgress}%` }}></div></div>
-                            )}
-                          </div>
-                          <button className="tf-btn btn-fill justify-content-center mt-3" onClick={submitReview} disabled={reviewSubmitting}>
-                            {reviewSubmitting ? "Submitting..." : "Submit Review"}
-                          </button>
-                        </div>
-                      )}
-
-                      {/* Display Existing Reviews */}
-                      <div className="review-list mt-5">
-                        {product?.reviews && product.reviews.length > 0 ? (
-                          product.reviews.map((rev) => (
-                            <div key={rev.id} className="review-item mb-4 pb-4 border-bottom">
-                              <div className="d-flex align-items-center gap-2 mb-2">
-                                <div className="list-star" style={{ display: "flex" }}>
-                                  {[1, 2, 3, 4, 5].map((s) => (
-                                    <i
-                                      key={s}
-                                      className={`icon icon-star`}
-                                      style={{ color: s <= rev.rating ? "#ffc107" : "#e0e0e0" }}
-                                    ></i>
-                                  ))}
-                                </div>
-                                <span className="fw-6">{rev.name}</span>
-                                {rev.customerMeta && <span className="ms-2 badge bg-secondary">{rev.customerMeta}</span>}
-                                <span className="text-secondary text-caption-1">{new Date(rev.createdAt).toLocaleDateString()}</span>
-                              </div>
-                              {rev.heading && <h6 className="mb-2 fw-6">{rev.heading}</h6>}
-                              {rev.text && <p>{rev.text}</p>}
-                              {rev.image && (
-                                <div className="mt-2" style={{ width: "80px", height: "80px", position: "relative" }}>
-                                  <Image src={rev.image} alt="Review Image" fill style={{ objectFit: "cover", borderRadius: "6px" }} />
+                          <div className="form-content">
+                            <fieldset className="box-field">
+                              <label className="label">Review Title (Optional)</label>
+                              <input
+                                type="text"
+                                placeholder="Give your review a title"
+                                value={reviewHeading}
+                                onChange={(e) => setReviewHeading(e.target.value)}
+                              />
+                            </fieldset>
+                            <fieldset className="box-field">
+                              <label className="label">Review *</label>
+                              <textarea
+                                rows={4}
+                                placeholder="Write your comment here"
+                                required
+                                value={reviewText}
+                                onChange={(e) => setReviewText(e.target.value)}
+                              />
+                            </fieldset>
+                            <fieldset className="box-field">
+                              <label className="label">Image (Optional)</label>
+                              <input 
+                                type="file"
+                                className="form-control"
+                                style={{ padding: "10px 20px" }}
+                                accept="image/*"
+                                ref={reviewFileInputRef}
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    setReviewImageFile(file);
+                                    setReviewImagePreview(URL.createObjectURL(file));
+                                  } else {
+                                    setReviewImageFile(null);
+                                    setReviewImagePreview(null);
+                                  }
+                                }}
+                              />
+                              {reviewImagePreview && (
+                                <div className="mt-2 position-relative" style={{ width: "80px", height: "80px" }}>
+                                  <Image src={reviewImagePreview} alt="Preview" fill style={{ objectFit: "cover", borderRadius: "8px" }} />
+                                  <button type="button" className="btn btn-sm btn-danger position-absolute top-0 end-0" onClick={() => { setReviewImageFile(null); setReviewImagePreview(null); if (reviewFileInputRef.current) reviewFileInputRef.current.value = ""; }} style={{ padding: "0px 6px", transform: "translate(25%, -25%)", borderRadius: "50%" }}>&times;</button>
                                 </div>
                               )}
+                              {reviewSubmitting && reviewUploadProgress > 0 && reviewUploadProgress < 100 && reviewImageFile && (
+                                <div className="progress mt-2" style={{ height: "10px" }}><div className="progress-bar" style={{ width: `${reviewUploadProgress}%` }}></div></div>
+                              )}
+                            </fieldset>
+                            <div className="box-field group-2 mt-4">
+                              <fieldset>
+                                <label className="label">Your Name *</label>
+                                <input
+                                  type="text"
+                                  placeholder="Your Name *"
+                                  value={reviewName}
+                                  onChange={(e) => setReviewName(e.target.value)}
+                                  required
+                                  readOnly
+                                  style={{ backgroundColor: "#eaeaea" }}
+                                />
+                              </fieldset>
+                              <fieldset>
+                                <label className="label">Customer Label (e.g. Verified Buyer)</label>
+                                <input
+                                  type="text"
+                                  placeholder="Customer Label (e.g. Verified Buyer)"
+                                  value={reviewCustomerMeta}
+                                  onChange={(e) => setReviewCustomerMeta(e.target.value)}
+                                />
+                              </fieldset>
                             </div>
-                          ))
-                        ) : (
-                          <div className="text-center text-secondary py-4">No reviews yet. Be the first to review this product!</div>
-                        )}
-                      </div>
+                          </div>
+                          <div className="button-submit mt-4">
+                            <button
+                              className="tf-btn btn-fill animate-hover-btn"
+                              type="submit"
+                              disabled={reviewSubmitting}
+                            >
+                              {reviewSubmitting ? "Submitting..." : "Submit Review"}
+                            </button>
+                          </div>
+                        </form>
+                      ) : (
+                        <div className="reply-comment cancel-review-wrap mt-4">
+                          <div className="d-flex mb_24 gap-20 align-items-center justify-content-between flex-wrap">
+                            <h5 className="">{totalReviews} Comments</h5>
+                            <div className="d-flex align-items-center gap-12">
+                              <div className="text-caption-1">Sort by:</div>
+                              <div className="tf-dropdown-sort">
+                                <div className="btn-select">
+                                  <span className="text-sort-value">Most Recent</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
 
+                          <div className="reply-comment-wrap mt-4">
+                            {product?.reviews && product.reviews.length > 0 ? (
+                              product.reviews.map((rev) => (
+                                <div key={rev.id} className="reply-comment-item">
+                                  <div className="user">
+                                    <div className="image bg-secondary d-flex align-items-center justify-content-center text-white rounded-circle fw-bold" style={{ width: 60, height: 60, fontSize: 24, flexShrink: 0 }}>
+                                      {rev.name.charAt(0).toUpperCase()}
+                                    </div>
+                                    <div>
+                                      <h6>
+                                        <span className="link">
+                                          {rev.name}
+                                        </span>
+                                        {rev.customerMeta && <span className="ms-2 badge bg-secondary text-caption-1">{rev.customerMeta}</span>}
+                                      </h6>
+                                      <div className="day text_black-2">{new Date(rev.createdAt).toLocaleDateString()}</div>
+                                      <div className="list-star" style={{ marginTop: 6 }}>
+                                        {[1, 2, 3, 4, 5].map((s) => (
+                                          <i
+                                            key={s}
+                                            className={`icon icon-star`}
+                                            style={{ color: s <= rev.rating ? "#ffc107" : "#e0e0e0", fontSize: 14 }}
+                                          ></i>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  </div>
+                                  
+                                  {rev.heading && <h6 className="fw-6 mt-3 mb-2">{rev.heading}</h6>}
+                                  {rev.text && <p className="text_black-2 mt-2" style={{ whiteSpace: "pre-wrap" }}>{rev.text}</p>}
+                                  {rev.image && (
+                                    <div className="mt-3" style={{ width: "120px", height: "120px", position: "relative" }}>
+                                      <Image src={rev.image} alt="Review Image" fill style={{ objectFit: "cover", borderRadius: "8px" }} />
+                                    </div>
+                                  )}
+                                </div>
+                              ))
+                            ) : (
+                              <div className="text-center text-secondary py-4">No reviews yet. Be the first to review this product!</div>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
-                  <div
-                    className={`widget-content-inner ${activeTab === "Shipping" ? "active" : ""}`}
-                  >
+                  
+                  {/* SHIPPING TAB */}
+                  <div className={`widget-content-inner ${activeTab === "Shipping" ? "active" : ""}`}>
                     <div className="tf-page-privacy-policy">
                       <div className="title">Shipping Policy</div>
                       <p>
@@ -1206,9 +1298,9 @@ export default function ProductPage({ slug }: { slug: string }) {
                       </p>
                     </div>
                   </div>
-                  <div
-                    className={`widget-content-inner ${activeTab === "Return Policies" ? "active" : ""}`}
-                  >
+                  
+                  {/* RETURN POLICIES TAB */}
+                  <div className={`widget-content-inner ${activeTab === "Return Policies" ? "active" : ""}`}>
                     <div className="tf-page-privacy-policy">
                       <div className="title">Return Policies</div>
                       <p>
