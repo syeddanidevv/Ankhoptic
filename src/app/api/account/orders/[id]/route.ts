@@ -42,8 +42,15 @@ export async function GET(
     items: order.items.map((item) => {
       let image = item.productImage ?? null;
       if (!image && item.product) {
-        const imgs = item.product.images as string[];
-        image = Array.isArray(imgs) && imgs.length > 0 ? imgs[0] : null;
+        let imgs: unknown = item.product.images;
+        if (typeof imgs === "string") {
+          try {
+            imgs = JSON.parse(imgs || "[]");
+          } catch {
+            imgs = imgs ? [imgs] : [];
+          }
+        }
+        image = Array.isArray(imgs) && imgs.length > 0 ? (imgs[0] as string) : null;
       }
       return {
         id: item.id,
