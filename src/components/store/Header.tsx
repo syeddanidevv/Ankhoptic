@@ -33,46 +33,8 @@ export default function Header() {
     { label: string; value: string }[]
   >([]);
 
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isVisible, setIsVisible] = useState(true);
-  const [lastScrollTop, setLastScrollTop] = useState(0);
-  const [mounted, setMounted] = useState(false);
-
   const items = useCartStore((state) => state.items);
   const cartCount = items.reduce((sum, item) => sum + item.qty, 0);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const st = window.pageYOffset || document.documentElement.scrollTop;
-      const threshold = 0; // Lower threshold to hide on "one scroll"
-      const delta = 5;
-
-      if (st > threshold) {
-        if (st > lastScrollTop + delta) {
-          // Scrolling Down - hide immediately
-          setIsVisible(false);
-        } else if (st < lastScrollTop - delta) {
-          // Scrolling Up - show with background
-          setIsVisible(true);
-          setIsScrolled(true);
-        }
-      } else {
-        // At the very top
-        setIsVisible(true);
-        setIsScrolled(false);
-      }
-
-      setLastScrollTop(st <= 0 ? 0 : st);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [lastScrollTop]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setMounted(true), 0);
-    return () => clearTimeout(timer);
-  }, []);
 
   // Fetch brands + their categories from DB
   useEffect(() => {
@@ -125,14 +87,7 @@ export default function Header() {
     <>
       <header
         id="header"
-        className={`header-default ${isScrolled ? "header-bg" : ""}`}
-        style={{
-          position: "fixed",
-          top: isVisible ? "0" : "-120px",
-          transition: "all 0.3s ease-in-out",
-          width: "100%",
-          zIndex: 1000,
-        }}
+        className="header-default"
       >
         <div className="container-full px_15 lg-px_40">
           <div className="row wrapper-header align-items-center">
@@ -999,7 +954,7 @@ export default function Header() {
                     className="nav-icon-item"
                   >
                     <i className="icon icon-bag" />
-                    <span className="count-box">{mounted ? cartCount : 0}</span>
+                    <span className="count-box">{cartCount}</span>
                   </a>
                 </li>
               </ul>
