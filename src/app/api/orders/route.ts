@@ -119,7 +119,7 @@ export async function POST(req: NextRequest) {
         shippingCost,
         total,
         notes: notes || null,
-        shippingAddress: { 
+        shippingAddress: JSON.stringify({ 
           name, 
           email, 
           phone, 
@@ -127,7 +127,7 @@ export async function POST(req: NextRequest) {
           city, 
           province, 
           postalCode: postalCode || "" 
-        },
+        }),
         items: {
           create: (items as {
             slug: string; title: string; lensType: string;
