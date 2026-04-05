@@ -28,6 +28,7 @@ jobs:
             cd /home/ubuntu/Ankhoptic
 
             echo "==> Pulling latest code"
+            git remote set-url origin https://github.com/syeddanidevv/Ankhoptic.git
             git pull origin main
 
             echo "==> Installing dependencies"
