@@ -30,8 +30,15 @@ export async function GET() {
     const firstItem = o.items[0];
     let firstImage: string | null = firstItem?.productImage ?? null;
     if (!firstImage && firstItem?.product) {
-      const imgs = firstItem.product.images as string[];
-      firstImage = Array.isArray(imgs) && imgs.length > 0 ? imgs[0] : null;
+      let imgs: unknown = firstItem.product.images;
+      if (typeof imgs === "string") {
+        try {
+          imgs = JSON.parse(imgs || "[]");
+        } catch {
+          imgs = imgs ? [imgs] : [];
+        }
+      }
+      firstImage = Array.isArray(imgs) && imgs.length > 0 ? (imgs[0] as string) : null;
     }
 
     return {
