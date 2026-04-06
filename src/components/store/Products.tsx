@@ -115,7 +115,11 @@ export default function Products() {
 
   // ── Fetch metadata ──────────────────────────────────────────────────────────
   useEffect(() => {
-    fetch("/api/store/brands")
+    // Filter brands by productType so lenses don't show glasses brands and vice versa
+    const brandUrl = productTypeParam
+      ? `/api/store/brands?type=${productTypeParam}`
+      : "/api/store/brands";
+    fetch(brandUrl)
       .then((r) => r.json())
       .then(setBrands)
       .catch(() => {});
@@ -127,7 +131,7 @@ export default function Products() {
         else if (d.modalities) setDisposabilities(d.modalities);
       })
       .catch(() => {});
-  }, []);
+  }, [productTypeParam]);
 
   // ── Fetch products ──────────────────────────────────────────────────────────
   const fetchProducts = useCallback(
@@ -227,11 +231,14 @@ export default function Products() {
   ];
 
   // Page title
-  let pageTitle = "All Lenses";
+  const isGlasses = productTypeParam === "GLASSES";
+
+  let pageTitle = isGlasses ? "All Glasses" : "All Lenses";
   if (brandParam)
-    pageTitle = `${brands.find((b) => b.slug === brandParam)?.name ?? brandParam} Lenses`;
-  else if (colorParam) pageTitle = `${colorParam} Colored Lenses`;
-  else if (disposabilityParam) pageTitle = `${disposabilities.find(d => d.value === disposabilityParam)?.label || disposabilityParam} Lenses`;
+    pageTitle = `${brands.find((b) => b.slug === brandParam)?.name ?? brandParam} ${isGlasses ? "Glasses" : "Lenses"}`;
+  else if (colorParam) pageTitle = isGlasses ? `${colorParam} Glasses` : `${colorParam} Colored Lenses`;
+  else if (disposabilityParam && !isGlasses) pageTitle = `${disposabilities.find(d => d.value === disposabilityParam)?.label || disposabilityParam} Lenses`;
+  else if (categoryParam) pageTitle = categoryParam.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
   else if (tagParam === "deals") pageTitle = "Deals & Offers";
   else if (searchParam) pageTitle = `Search: "${searchParam}"`;
 
@@ -392,7 +399,7 @@ export default function Products() {
       {/* Color filter */}
       {colors.length > 0 && (
         <div className="sidebar-widget">
-          <div className="sidebar-widget-title">Color</div>
+          <div className="sidebar-widget-title">{isGlasses ? "Frame Color" : "Lens Color"}</div>
           <div className="sidebar-color-grid">
             {colors.map((c) => (
               <button
@@ -416,8 +423,8 @@ export default function Products() {
         </div>
       )}
 
-      {/* Disposability filter */}
-      {disposabilities.length > 0 && productTypeParam !== "GLASSES" && (
+      {/* Disposability filter — only for lenses */}
+      {!isGlasses && disposabilities.length > 0 && (
         <div className="sidebar-widget">
           <div className="sidebar-widget-title">Disposability</div>
           <ul className="sidebar-filter-list">

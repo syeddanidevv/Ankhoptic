@@ -10,9 +10,7 @@ export async function GET(request: NextRequest) {
       where: type
         ? {
             products: {
-              some: {
-                productType: type,
-              },
+              some: { productType: type },
             },
           }
         : undefined,
@@ -23,6 +21,14 @@ export async function GET(request: NextRequest) {
         slug: true,
         logo: true,
         categories: {
+          // Only include categories that have at least one product of the requested type
+          where: type
+            ? {
+                products: {
+                  some: { productType: type },
+                },
+              }
+            : undefined,
           select: { id: true, name: true, slug: true },
           orderBy: { position: "asc" },
         },

@@ -133,7 +133,7 @@ export default function Header() {
                     onMouseEnter={() => setShowLensMenu(true)}
                     onMouseLeave={() => setShowLensMenu(false)}
                   >
-                    <Link href="/shop" className="item-link">
+                    <Link href="/shop?productType=LENS" className="item-link">
                       Lenses <i className="icon icon-arrow-down" />
                     </Link>
                     <div
@@ -221,7 +221,7 @@ export default function Header() {
                             }}
                           >
                             <Link
-                              href="/shop"
+                              href="/shop?productType=LENS"
                               style={{
                                 fontSize: "12px",
                                 fontWeight: "700",
@@ -364,7 +364,7 @@ export default function Header() {
                     onMouseEnter={() => setShowGlassesMenu(true)}
                     onMouseLeave={() => setShowGlassesMenu(false)}
                   >
-                    <Link href="/shop" className="item-link">
+                    <Link href="/shop?productType=GLASSES" className="item-link">
                       Glasses <i className="icon icon-arrow-down" />
                     </Link>
                     <div
@@ -1083,7 +1083,7 @@ export default function Header() {
                     )}
                     <li>
                       <Link
-                        href="/shop"
+                        href="/shop?productType=LENS"
                         className="sub-nav-link"
                         style={{ fontWeight: 600 }}
                       >
