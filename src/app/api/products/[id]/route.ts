@@ -27,7 +27,13 @@ export async function GET(
     });
 
     if (!product) return NextResponse.json({ error: "Not found" }, { status: 404 });
-    return NextResponse.json(product);
+
+    const parsedProduct = {
+      ...product,
+      images: product.images ? JSON.parse(product.images) : [],
+    };
+
+    return NextResponse.json(parsedProduct);
   } catch {
     return NextResponse.json({ error: "Failed to fetch product" }, { status: 500 });
   }
@@ -60,7 +66,11 @@ export async function PATCH(
       data:  body,
       include: { brand: true, category: true },
     });
-    return NextResponse.json(product);
+    const parsedProduct = {
+      ...product,
+      images: product.images ? JSON.parse(product.images) : [],
+    };
+    return NextResponse.json(parsedProduct);
   } catch (e) {
     console.error("Failed to update product:", e);
     return NextResponse.json({ error: "Failed to update product" }, { status: 500 });

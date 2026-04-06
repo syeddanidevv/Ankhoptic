@@ -36,7 +36,12 @@ export async function GET(req: NextRequest) {
       prisma.product.count({ where }),
     ]);
 
-    return NextResponse.json({ products, total, page, limit });
+    const parsedProducts = products.map(p => ({
+      ...p,
+      images: p.images ? JSON.parse(p.images) : [],
+    }));
+
+    return NextResponse.json({ products: parsedProducts, total, page, limit });
   } catch {
     return NextResponse.json({ error: "Failed to fetch products" }, { status: 500 });
   }
@@ -70,7 +75,11 @@ export async function POST(req: NextRequest) {
       include: { brand: true, category: true },
     });
 
-    return NextResponse.json(product, { status: 201 });
+    const parsedProduct = {
+      ...product,
+      images: product.images ? JSON.parse(product.images) : [],
+    };
+    return NextResponse.json(parsedProduct, { status: 201 });
   } catch {
     return NextResponse.json({ error: "Failed to create product" }, { status: 500 });
   }
