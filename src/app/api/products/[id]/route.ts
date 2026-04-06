@@ -51,6 +51,10 @@ export async function PATCH(
     // Enforce inStock = true as requested
     body.inStock = true;
 
+    if (body.images !== undefined) {
+      body.images = JSON.stringify(body.images);
+    }
+
     const product = await prisma.product.update({
       where: { id },
       data:  body,
@@ -79,10 +83,19 @@ export async function DELETE(
     await prisma.product.delete({ where: { id } });
 
     // Delete all images associated with the product from Cloudinary
-    if (product.images && Array.isArray(product.images)) {
-      await Promise.all(
-        product.images.map((img: unknown) => typeof img === "string" ? deleteImage(img) : Promise.resolve())
-      );
+    if (product.images) {
+      try {
+        const imagesArray = JSON.parse(product.images);
+        if (Array.isArray(imagesArray)) {
+          await Promise.all(
+            imagesArray.map((img: unknown) =>
+              typeof img === "string" ? deleteImage(img) : Promise.resolve()
+            )
+          );
+        }
+      } catch (err) {
+        console.error("Failed to parse product images during delete", err);
+      }
     }
 
     return NextResponse.json({ success: true });

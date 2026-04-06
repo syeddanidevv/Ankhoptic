@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
         disposability: body.disposability ?? null,
         inStock:      true, // Always true for now as requested
         stockCount:   parseInt(body.stockCount ?? "0"),
-        images:       body.images ?? [],
+        images:       JSON.stringify(body.images ?? []),
         status:       body.status ?? "DRAFT",
         featured:     body.featured ?? false,
         brandId:      body.brandId ?? null,
