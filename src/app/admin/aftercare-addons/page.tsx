@@ -87,7 +87,7 @@ export default function AftercarePage() {
     });
     setErrors({});
     setPendingFile(null);
-    setPreviewUrl(null);
+    setPreviewUrl(a.image ?? null);
     setModalOpen(true);
   };
   
