@@ -62,7 +62,7 @@ export default function QuickAdd() {
   };
 
   // Power options + addons fetched from full product API
-  type AddonItem = { id: string; name: string; extraCharge: number; retailPrice: number };
+  type AddonItem = { id: string; name: string; extraCharge: number; retailPrice: number; image?: string | null; };
   const [powerOptions, setPowerOptions] = useState<PowerOption[]>([]);
   const [addons, setAddons] = useState<AddonItem[]>([]);
   const [selectedAddonId, setSelectedAddonId] = useState<string>("none");
@@ -116,6 +116,7 @@ export default function QuickAdd() {
         prescriptionName: prescriptionFile?.name ?? null,
         addonName: selectedAddon ? selectedAddon.name : "",
         addonPrice: selectedAddon ? selectedAddon.extraCharge : 0,
+        addonImage: selectedAddon ? selectedAddon.image : null,
         unitPrice: product.price,
       };
 
@@ -771,15 +772,20 @@ export default function QuickAdd() {
                               name="qa-aftercare"
                               checked={selectedAddonId === a.id}
                               onChange={() => setSelectedAddonId(a.id)}
-                              style={{ accentColor: "var(--primary, #0d1b4b)", width: 15, height: 15, cursor: "pointer" }}
+                              style={{ accentColor: "var(--primary, #0d1b4b)", width: 15, height: 15, cursor: "pointer", alignSelf: "flex-start", marginTop: 2 }}
                             />
-                            <span style={{ fontWeight: 600, color: "#333" }}>
-                              {a.name}
-                              <span style={{ color: "#999", textDecoration: "line-through", fontSize: 13, marginLeft: 6 }}>
-                                Rs{a.retailPrice}
-                              </span>
-                              <span style={{ fontWeight: 700, color: "#222", fontSize: 13, marginLeft: 5 }}>
-                                [+Rs{a.extraCharge}]
+                            {a.image && (
+                              <img src={a.image} alt={a.name} style={{ width: 40, height: 40, objectFit: "cover", borderRadius: 4, border: "1px solid #eee" }} />
+                            )}
+                            <span style={{ fontWeight: 600, color: "#333", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                              <span>{a.name}</span>
+                              <span style={{ fontSize: 13, marginTop: 2 }}>
+                                <span style={{ color: "#999", textDecoration: "line-through", marginRight: 6 }}>
+                                  Rs{a.retailPrice}
+                                </span>
+                                <span style={{ fontWeight: 700, color: "#222" }}>
+                                  [+Rs{a.extraCharge}]
+                                </span>
                               </span>
                             </span>
                           </label>

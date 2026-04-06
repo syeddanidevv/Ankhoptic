@@ -8,7 +8,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (authErr) return authErr;
   const { id } = await params;
   try {
-    const { name, extraCharge, retailPrice, description, active } = await req.json();
+    const { name, extraCharge, retailPrice, description, active, image } = await req.json();
     const addon = await prisma.aftercareAddon.update({
       where: { id },
       data: {
@@ -17,6 +17,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         ...(retailPrice !== undefined && { retailPrice: parseFloat(retailPrice) }),
         ...(description !== undefined && { description: description?.trim() || null }),
         ...(active !== undefined && { active }),
+        ...(image !== undefined && { image: image || null }),
       },
     });
     return NextResponse.json(addon);

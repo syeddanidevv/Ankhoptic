@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
@@ -27,7 +28,7 @@ type Product = {
   powerOptions: PowerOption[];
   reviews: { id: string; name: string; rating: number; heading: string | null; text: string | null; customerMeta: string | null; image: string | null; createdAt: string }[];
   _count: { reviews: number };
-  addons?: { id: string; name: string; extraCharge: number; retailPrice: number; }[];
+  addons?: { id: string; name: string; extraCharge: number; retailPrice: number; image?: string | null; }[];
 };
 
 const PLACEHOLDER = "/store/images/item/tets1.jpg";
@@ -272,6 +273,7 @@ export default function ProductPage({ slug }: { slug: string }) {
         prescriptionName: prescriptionFile?.name ?? null,
         addonName: selectedAddon ? selectedAddon.name : "",
         addonPrice: selectedAddon ? selectedAddon.extraCharge : 0,
+        addonImage: selectedAddon ? selectedAddon.image : null,
         unitPrice: product.price,
       };
 
@@ -986,15 +988,20 @@ export default function ProductPage({ slug }: { slug: string }) {
                                   name="aftercare"
                                   checked={selectedAddonId === a.id}
                                   onChange={() => setSelectedAddonId(a.id)}
-                                  style={{ accentColor: "var(--primary, #0d1b4b)", cursor: "pointer", width: 16, height: 16 }}
+                                  style={{ accentColor: "var(--primary, #0d1b4b)", cursor: "pointer", width: 16, height: 16, alignSelf: "flex-start", marginTop: 2 }}
                                 />
-                                <span style={{ fontWeight: 600, color: "#333" }}>
-                                  {a.name}
-                                  <span style={{ color: "#888", textDecoration: "line-through", fontSize: 14, marginLeft: 6 }}>
-                                    Rs{a.retailPrice}
-                                  </span>
-                                  <span style={{ fontWeight: 700, color: "#222", fontSize: 14, marginLeft: 6 }}>
-                                    [+Rs{a.extraCharge}]
+                                {a.image && (
+                                  <img src={a.image} alt={a.name} style={{ width: 40, height: 40, objectFit: "cover", borderRadius: 4, border: "1px solid #eee" }} />
+                                )}
+                                <span style={{ fontWeight: 600, color: "#333", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                                  <span>{a.name}</span>
+                                  <span style={{ fontSize: 13, marginTop: 2 }}>
+                                    <span style={{ color: "#999", textDecoration: "line-through", marginRight: 6 }}>
+                                      Rs{a.retailPrice}
+                                    </span>
+                                    <span style={{ fontWeight: 700, color: "#222" }}>
+                                      [+Rs{a.extraCharge}]
+                                    </span>
                                   </span>
                                 </span>
                               </label>

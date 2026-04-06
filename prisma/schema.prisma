@@ -124,6 +124,7 @@ model AftercareAddon {
   extraCharge Float
   retailPrice Float
   description String?
+  image       String? @db.LongText
   position    Int     @default(0)
   active      Boolean @default(true)
 

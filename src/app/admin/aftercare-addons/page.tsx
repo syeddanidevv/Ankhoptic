@@ -1,13 +1,14 @@
 "use client";
 import { useState, useEffect } from "react";
 import {
-  Box, Text, HStack, VStack, Flex, Switch,
+  Box, Text, HStack, VStack, Flex, Switch, Image
 } from "@chakra-ui/react";
 import {
   T, PageHeader, StatCard, SectionCard, FormField,
   InputField, FieldError, AdminButton, AdminModal, AdminLoader,
   TableShell, THead, TR, TD, EmptyRow,
 } from "@/components/admin/ui";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 import toast from "react-hot-toast";
 
 interface Addon {
@@ -16,6 +17,7 @@ interface Addon {
   extraCharge: number;
   retailPrice: number;
   description: string | null;
+  image: string | null;
   position: number;
   active: boolean;
 }
@@ -25,10 +27,11 @@ interface FormState {
   extraCharge: string;
   retailPrice: string;
   description: string;
+  image: string;
 }
 interface FormErrors { name?: string; extraCharge?: string; retailPrice?: string; }
 
-const EMPTY: FormState = { name: "", extraCharge: "", retailPrice: "", description: "" };
+const EMPTY: FormState = { name: "", extraCharge: "", retailPrice: "", description: "", image: "" };
 
 function validate(f: FormState): FormErrors {
   const e: FormErrors = {};
@@ -48,6 +51,12 @@ export default function AftercarePage() {
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitting, setSubmitting] = useState(false);
 
+  // Image upload states
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
   const fetch_ = () => {
     setLoading(true);
     fetch("/api/aftercare-addons")
@@ -58,31 +67,84 @@ export default function AftercarePage() {
   };
   useEffect(() => { fetch_(); }, []);
 
-  const openAdd = () => { setEditing(null); setForm(EMPTY); setErrors({}); setModalOpen(true); };
+  const openAdd = () => { 
+    setEditing(null); 
+    setForm(EMPTY); 
+    setErrors({}); 
+    setPendingFile(null);
+    setPreviewUrl(null);
+    setModalOpen(true); 
+  };
+  
   const openEdit = (a: Addon) => {
     setEditing(a);
-    setForm({ name: a.name, extraCharge: a.extraCharge.toString(), retailPrice: a.retailPrice.toString(), description: a.description ?? "" });
+    setForm({ 
+      name: a.name, 
+      extraCharge: a.extraCharge.toString(), 
+      retailPrice: a.retailPrice.toString(), 
+      description: a.description ?? "", 
+      image: a.image ?? "" 
+    });
     setErrors({});
+    setPendingFile(null);
+    setPreviewUrl(null);
     setModalOpen(true);
   };
+  
   const openDelete = (a: Addon) => { setEditing(a); setDeleteModal(true); };
 
-  const set = (k: keyof FormState, v: string) => setForm((f) => ({ ...f, [k]: v }));
+  const setObj = (k: keyof FormState, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
   const save = async () => {
     const errs = validate(form);
     if (Object.keys(errs).length) { setErrors(errs); return; }
     setSubmitting(true);
     try {
+      let finalImage = form.image;
+      if (pendingFile) {
+        setUploading(true);
+        setUploadProgress(0);
+        finalImage = await new Promise<string>((resolve, reject) => {
+          const fd = new FormData();
+          fd.append("file", pendingFile);
+          const xhr = new XMLHttpRequest();
+          xhr.upload.onprogress = (e) => {
+            if (e.lengthComputable)
+              setUploadProgress(Math.round((e.loaded / e.total) * 100));
+          };
+          xhr.onload = () => {
+            if (xhr.status >= 200 && xhr.status < 300) {
+              try { resolve(JSON.parse(xhr.responseText).url); } 
+              catch { reject(new Error("Invalid upload response")); }
+            } else {
+              try { reject(new Error(JSON.parse(xhr.responseText).error ?? "Upload failed")); } 
+              catch { reject(new Error("Upload failed")); }
+            }
+          };
+          xhr.onerror = () => reject(new Error("Network error during upload"));
+          xhr.open("POST", "/api/upload");
+          xhr.send(fd);
+        });
+        setObj("image", finalImage);
+        setPendingFile(null);
+        setUploading(false);
+        setUploadProgress(100);
+      }
+
       const url = editing ? `/api/aftercare-addons/${editing.id}` : "/api/aftercare-addons";
       const method = editing ? "PATCH" : "POST";
-      const res = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(form) });
+      const res = await fetch(url, { 
+        method, 
+        headers: { "Content-Type": "application/json" }, 
+        body: JSON.stringify({ ...form, image: finalImage }) 
+      });
       if (!res.ok) throw new Error();
       toast.success(editing ? "Addon updated!" : "Addon created!");
       setModalOpen(false);
       fetch_();
     } catch {
       toast.error("Failed to save addon");
+      setUploading(false);
     } finally {
       setSubmitting(false);
     }
@@ -120,7 +182,6 @@ export default function AftercarePage() {
 
   return (
     <Box bg={T.bg} minH="100%" p={6}>
-      {/* PageHeader — action buttons go as children */}
       <PageHeader
         title="Aftercare Add-ons"
         subtitle="Manage care kits offered at checkout with each lens order"
@@ -128,21 +189,30 @@ export default function AftercarePage() {
         <AdminButton variant="primary" size="sm" onClick={openAdd}>+ Add Addon</AdminButton>
       </PageHeader>
 
-      {/* Stats */}
       <HStack gap={4} mb={6} flexWrap="wrap">
         <StatCard label="Total Addons" value={addons.length} />
         <StatCard label="Active" value={activeCount} color={T.green} />
         <StatCard label="Inactive" value={addons.length - activeCount} color={T.red} />
       </HStack>
 
-      {/* Table */}
       <SectionCard title="All Aftercare Add-ons" subtitle="Toggle active/inactive or edit details">
         <TableShell showPagination={false}>
-          <THead columns={["Name", "Extra Charge", "Retail Price", "Description", "Status", "Actions"]} />
+          <THead columns={["Image", "Name", "Extra Charge", "Retail Price", "Description", "Status", "Actions"]} />
           <tbody>
-            {addons.length === 0 && <EmptyRow cols={6} message="No aftercare addons yet — add one above." />}
+            {addons.length === 0 && <EmptyRow cols={7} message="No aftercare addons yet — add one above." />}
             {addons.map((a, i) => (
               <TR key={a.id} index={i}>
+                <TD>
+                  {a.image ? (
+                    <Box w="40px" h="40px" borderRadius="8px" border={`1px solid ${T.border}`} bg="white" display="flex" alignItems="center" justifyContent="center" overflow="hidden">
+                      <Image src={a.image} alt={a.name} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+                    </Box>
+                  ) : (
+                    <Box w="40px" h="40px" borderRadius="8px" border={`1px solid ${T.border}`} bg={T.bg} display="flex" alignItems="center" justifyContent="center">
+                      <Text fontSize="18px">📦</Text>
+                    </Box>
+                  )}
+                </TD>
                 <TD>
                   <Text fontSize="13.5px" fontWeight={600} color={T.text}>{a.name}</Text>
                 </TD>
@@ -180,16 +250,30 @@ export default function AftercarePage() {
         </TableShell>
       </SectionCard>
 
-      {/* Add / Edit Modal — footer goes inside children */}
       <AdminModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         title={editing ? "Edit Addon" : "Add Aftercare Addon"}
       >
         <VStack gap={4} align="stretch">
+          
+          <FormField label="Addon Image">
+            <ImageUpload
+              value={form.image || ""}
+              previewUrl={previewUrl || ""}
+              onChange={(img: string) => setObj("image", img)}
+              onPreview={setPreviewUrl}
+              onFileSelect={setPendingFile}
+              uploadOnSelect={false}
+              uploading={uploading}
+              progress={uploadProgress}
+              label="Drop image here or click to browse"
+            />
+          </FormField>
+
           <FormField label="Addon name" required>
             <InputField iconName="package" placeholder="e.g. Starter Kit"
-              value={form.name} onChange={(e) => set("name", e.target.value)}
+              value={form.name} onChange={(e) => setObj("name", e.target.value)}
               isInvalid={!!errors.name}
             />
             <FieldError msg={errors.name} />
@@ -199,7 +283,7 @@ export default function AftercarePage() {
             <Box flex={1}>
               <FormField label="Extra charge (Rs)" required>
                 <InputField type="number" placeholder="280"
-                  value={form.extraCharge} onChange={(e) => set("extraCharge", e.target.value)}
+                  value={form.extraCharge} onChange={(e) => setObj("extraCharge", e.target.value)}
                   isInvalid={!!errors.extraCharge}
                 />
                 <FieldError msg={errors.extraCharge} />
@@ -208,7 +292,7 @@ export default function AftercarePage() {
             <Box flex={1}>
               <FormField label="Retail price (Rs)" required>
                 <InputField type="number" placeholder="500"
-                  value={form.retailPrice} onChange={(e) => set("retailPrice", e.target.value)}
+                  value={form.retailPrice} onChange={(e) => setObj("retailPrice", e.target.value)}
                   isInvalid={!!errors.retailPrice}
                 />
                 <FieldError msg={errors.retailPrice} />
@@ -218,21 +302,19 @@ export default function AftercarePage() {
 
           <FormField label="Description (optional)">
             <InputField placeholder="Brief description of what's included"
-              value={form.description} onChange={(e) => set("description", e.target.value)}
+              value={form.description} onChange={(e) => setObj("description", e.target.value)}
             />
           </FormField>
 
-          {/* Modal footer inside children */}
           <HStack gap={3} justify="flex-end" pt={2}>
             <AdminButton variant="ghost" size="sm" onClick={() => setModalOpen(false)}>Cancel</AdminButton>
-            <AdminButton variant="primary" size="sm" onClick={save} disabled={submitting}>
-              {submitting ? "Saving…" : editing ? "Save changes" : "Create addon"}
+            <AdminButton variant="primary" size="sm" onClick={save} disabled={submitting || uploading}>
+              {uploading ? "Uploading…" : submitting ? "Saving…" : editing ? "Save changes" : "Create addon"}
             </AdminButton>
           </HStack>
         </VStack>
       </AdminModal>
 
-      {/* Delete Confirm Modal */}
       <AdminModal
         isOpen={deleteModal}
         onClose={() => setDeleteModal(false)}
@@ -249,3 +331,4 @@ export default function AftercarePage() {
     </Box>
   );
 }
+

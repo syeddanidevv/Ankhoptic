@@ -237,16 +237,22 @@ export default function Cart() {
                                 )}
                                 {/* Addon */}
                                 {item.addonName && (
-                                  <span
+                                  <div
                                     style={{
-                                      display: "block",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: 6,
+                                      marginTop: 4,
                                       fontSize: 12,
                                       color: "#666",
                                     }}
                                   >
                                     <span style={{ fontWeight: 600, color: "#444" }}>Aftercare: </span>
-                                    {item.addonName}
-                                  </span>
+                                    {item.addonImage && (
+                                      <img src={item.addonImage} alt={item.addonName} style={{ width: 14, height: 14, objectFit: "cover", borderRadius: 2 }} />
+                                    )}
+                                    <span>{item.addonName}</span>
+                                  </div>
                                 )}
                               </div>
 

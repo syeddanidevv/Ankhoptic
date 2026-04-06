@@ -12,6 +12,7 @@ export interface CartItem {
   power:            string | null;
   prescriptionName: string | null; /* uploaded file name */
   addonName:        string;
+  addonImage?:      string | null;
   addonPrice:       number;
   unitPrice:        number;
   qty:              number;
