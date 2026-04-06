@@ -303,8 +303,18 @@ function SlidesSection({
     setAlt("");
   };
 
-  const removeConfirmed = (i: number) =>
+  const removeConfirmed = (i: number) => {
+    const slide = slides[i];
+    // Delete from Cloudinary if it's a real URL (not a blob)
+    if (slide.url && slide.url.includes("cloudinary.com")) {
+      fetch("/api/delete-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: slide.url }),
+      }).catch(console.error);
+    }
     onChange(slides.filter((_, idx) => idx !== i));
+  };
 
   const save = async () => {
     setSaving(true);
