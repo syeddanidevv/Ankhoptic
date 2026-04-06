@@ -103,28 +103,25 @@ export default function AftercarePage() {
       let finalImage = form.image;
       if (pendingFile) {
         setUploading(true);
-        setUploadProgress(0);
-        finalImage = await new Promise<string>((resolve, reject) => {
-          const fd = new FormData();
-          fd.append("file", pendingFile);
-          const xhr = new XMLHttpRequest();
-          xhr.upload.onprogress = (e) => {
-            if (e.lengthComputable)
-              setUploadProgress(Math.round((e.loaded / e.total) * 100));
-          };
-          xhr.onload = () => {
-            if (xhr.status >= 200 && xhr.status < 300) {
-              try { resolve(JSON.parse(xhr.responseText).url); } 
-              catch { reject(new Error("Invalid upload response")); }
-            } else {
-              try { reject(new Error(JSON.parse(xhr.responseText).error ?? "Upload failed")); } 
-              catch { reject(new Error("Upload failed")); }
-            }
-          };
-          xhr.onerror = () => reject(new Error("Network error during upload"));
-          xhr.open("POST", "/api/upload");
-          xhr.send(fd);
+        setUploadProgress(10); // Show some initial progress
+
+        const fd = new FormData();
+        fd.append("file", pendingFile);
+
+        const uploadRes = await fetch("/api/upload", {
+          method: "POST",
+          body: fd,
         });
+
+        if (!uploadRes.ok) {
+          const errData = await uploadRes.json().catch(() => ({}));
+          throw new Error(errData.error || "Upload failed");
+        }
+
+        const data = await uploadRes.json();
+        if (!data.url) throw new Error("Invalid upload response");
+
+        finalImage = data.url;
         setObj("image", finalImage);
         setPendingFile(null);
         setUploading(false);
@@ -142,8 +139,8 @@ export default function AftercarePage() {
       toast.success(editing ? "Addon updated!" : "Addon created!");
       setModalOpen(false);
       fetch_();
-    } catch {
-      toast.error("Failed to save addon");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to save addon");
       setUploading(false);
     } finally {
       setSubmitting(false);
