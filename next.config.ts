@@ -32,6 +32,11 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   // Required for Docker/Coolify deployment — produces a minimal self-contained server
   output: "standalone",
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "10mb",
+    },
+  },
   images: {
     remotePatterns: [
       {
