@@ -20,6 +20,7 @@ type Product = {
   discountTitle?: string;
   images: string[];
   disposability: string | null;
+  color: string | null;
   description: string | null;
   brand: { name: string; slug: string } | null;
   category: { name: string; slug: string } | null;
@@ -443,10 +444,18 @@ export default function ProductPage({ slug }: { slug: string }) {
                 <div className="tf-product-info-wrap position-relative product-info-sticky">
                   <div className="tf-product-info-list">
                     <div className="tf-product-info-title">
-                      <h2>{product.title}</h2>
+                      <h2 style={{ display: "flex", alignItems: "baseline", flexWrap: "wrap", gap: "8px" }}>
+                        <span>{product.title}</span>
+                        {(product.color || product.disposability) && (
+                          <span style={{ fontWeight: 400, opacity: 0.7, fontSize: "0.65em" }}>
+                            {product.color && <span style={{ textTransform: "capitalize" }}>- {product.color} </span>}
+                            {product.disposability && <span style={{ marginLeft: product.color ? 0 : "4px" }}>({DISPOSABILITY_LABELS[product.disposability] ?? product.disposability})</span>}
+                          </span>
+                        )}
+                      </h2>
                     </div>
 
-                    {(product.brand || product.disposability) && (
+                    {product.brand && (
                       <div
                         style={{
                           display: "flex",
@@ -456,18 +465,9 @@ export default function ProductPage({ slug }: { slug: string }) {
                           flexWrap: "wrap",
                         }}
                       >
-                        {product.brand && (
-                          <span className="badges text-uppercase py-1 px-3 d-inline-block rounded">
-                            {product.brand.name}
-                          </span>
-                        )}
-                        {product.disposability && (
-                          <span style={{ fontSize: 13, color: "#555" }}>
-                            Disposability:{" "}
-                            {DISPOSABILITY_LABELS[product.disposability] ??
-                              product.disposability}
-                          </span>
-                        )}
+                        <span className="badges text-uppercase py-1 px-3 d-inline-block rounded">
+                          {product.brand.name}
+                        </span>
                       </div>
                     )}
 

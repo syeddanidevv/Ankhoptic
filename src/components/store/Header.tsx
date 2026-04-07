@@ -184,7 +184,7 @@ export default function Header() {
                               style={{ marginBottom: "4px" }}
                             >
                               <Link
-                                href={`/shop?brand=${brand.slug}`}
+                                href={`/shop?brand=${brand.slug}&productType=LENS`}
                                 style={{
                                   display: "flex",
                                   justifyContent: "space-between",
@@ -281,7 +281,7 @@ export default function Header() {
                               }}
                             >
                               <Link
-                                href={`/shop?brand=${activeBrandData.slug}&category=${cat.slug}`}
+                                href={`/shop?brand=${activeBrandData.slug}&category=${cat.slug}&productType=LENS`}
                                 style={{
                                   fontSize: "13px",
                                   color: "#444",
@@ -590,7 +590,7 @@ export default function Header() {
 
                   {/* Shop By Color */}
                   <li className="menu-item position-relative">
-                    <Link href="/shop" className="item-link">
+                    <Link href="/shop?productType=LENS" className="item-link">
                       Shop By Color <i className="icon icon-arrow-down" />
                     </Link>
                     <div
@@ -606,7 +606,7 @@ export default function Header() {
                           colors.map((color) => (
                             <li key={color}>
                               <Link
-                                href={`/shop?color=${color}`}
+                                href={`/shop?color=${color}&productType=LENS`}
                                 className="menu-link-text link text_black-2"
                                 style={{
                                   display: "flex",
@@ -658,7 +658,7 @@ export default function Header() {
 
                   {/* Shop by Disposability */}
                   <li className="menu-item position-relative">
-                    <Link href="/shop" className="item-link">
+                    <Link href="/shop?productType=LENS" className="item-link">
                       Shop by Disposability{" "}
                       <i className="icon icon-arrow-down" />
                     </Link>
@@ -675,7 +675,7 @@ export default function Header() {
                           modalities.map((modality) => (
                             <li key={modality.value}>
                               <Link
-                                href={`/shop?disposability=${modality.value}`}
+                                href={`/shop?disposability=${modality.value}&productType=LENS`}
                                 className="menu-link-text link text_black-2"
                               >
                                 {modality.label}
@@ -1051,7 +1051,7 @@ export default function Header() {
                                   {brand.categories.map((cat) => (
                                     <li key={cat.id}>
                                       <Link
-                                        href={`/shop?brand=${brand.slug}&category=${cat.slug}`}
+                                        href={`/shop?brand=${brand.slug}&category=${cat.slug}&productType=LENS`}
                                         className="sub-nav-link"
                                       >
                                         {cat.name}
@@ -1063,7 +1063,7 @@ export default function Header() {
                             </>
                           ) : (
                             <Link
-                              href={`/shop?brand=${brand.slug}`}
+                              href={`/shop?brand=${brand.slug}&productType=LENS`}
                               className="sub-nav-link"
                             >
                               {brand.name}
@@ -1241,7 +1241,7 @@ export default function Header() {
                     ].map((c) => (
                       <li key={c}>
                         <Link
-                          href={`/shop?color=${c}`}
+                          href={`/shop?color=${c}&productType=LENS`}
                           className="sub-nav-link"
                           style={{ textTransform: "capitalize" }}
                         >
@@ -1271,7 +1271,7 @@ export default function Header() {
                       (d) => (
                         <li key={d}>
                           <Link
-                            href={`/shop?disposability=${d}`}
+                            href={`/shop?disposability=${d}&productType=LENS`}
                             className="sub-nav-link"
                             style={{ textTransform: "capitalize" }}
                           >

@@ -13,6 +13,7 @@ type Product = {
   discountTitle?: string;
   images: string[];
   disposability: string | null;
+  color: string | null;
   description: string | null;
   brand: { name: string; slug: string } | null;
 };
@@ -74,25 +75,13 @@ function ProductCard({ p }: { p: Product }) {
       </div>
       <div className="card-product-info">
         <div className="inner-info">
-          <Link href={`/products/${p.slug}`} className="title link fw-6">
-            {p.title}
-          </Link>
-          {p.disposability && (
-            <span
-              title="How long you can use this lens before replacing it"
-              style={{
-                fontSize: 12,
-                color: "#444",
-                fontWeight: 600,
-                display: "block",
-                marginBottom: 2,
-                cursor: "help",
-              }}
-            >
-              Disposability:{" "}
-              {DISPOSABILITY_LABELS[p.disposability] ?? p.disposability}
+          <Link href={`/products/${p.slug}`} className="title link fw-6" style={{ display: "block" }}>
+            <span>{p.title}</span>
+            <span style={{ fontWeight: 400, opacity: 0.7, fontSize: "0.85em", whiteSpace: "nowrap", marginLeft: "4px" }}>
+              {p.color && <span style={{ textTransform: "capitalize" }}>- {p.color} </span>}
+              {p.disposability && <span style={{ marginLeft: p.color ? 0 : "4px" }}>({DISPOSABILITY_LABELS[p.disposability] ?? p.disposability})</span>}
             </span>
-          )}
+          </Link>
           {/* Price row — strikethrough compare + sale price */}
           <div
             style={{

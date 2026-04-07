@@ -1226,56 +1226,14 @@ export default function Products() {
                           <Link
                             href={`/products/${p.slug}`}
                             className="title link fw-6"
+                            style={{ display: "block" }}
                           >
-                            {p.title}
+                            <span>{p.title}</span>
+                            <span style={{ fontWeight: 400, opacity: 0.7, fontSize: "0.85em", whiteSpace: "nowrap", marginLeft: "4px" }}>
+                              {p.color && <span style={{ textTransform: "capitalize" }}>- {p.color} </span>}
+                              {p.disposability && <span style={{ marginLeft: p.color ? 0 : "4px" }}>({DISPOSABILITY_LABELS[p.disposability] ?? p.disposability})</span>}
+                            </span>
                           </Link>
-                          {/* Compact info line: color · disposability */}
-                          {(p.color || p.disposability) && (
-                            <div
-                              style={{
-                                fontSize: 12,
-                                color: "#777",
-                                marginTop: 4,
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 4,
-                                flexWrap: "wrap",
-                              }}
-                            >
-                              {p.color && (
-                                <span
-                                  style={{
-                                    display: "inline-flex",
-                                    alignItems: "center",
-                                    gap: 3,
-                                  }}
-                                >
-                                  <span
-                                    style={{
-                                      width: 9,
-                                      height: 9,
-                                      borderRadius: "50%",
-                                      background: colorHex(p.color),
-                                      border: "1px solid rgba(0,0,0,0.12)",
-                                      display: "inline-block",
-                                      flexShrink: 0,
-                                    }}
-                                  />
-                                  {p.color.charAt(0) +
-                                    p.color.slice(1).toLowerCase()}
-                                </span>
-                              )}
-                              {p.color && p.disposability && (
-                                <span style={{ color: "#ccc" }}>·</span>
-                              )}
-                              {p.disposability && (
-                                <span>
-                                  {DISPOSABILITY_LABELS[p.disposability] ??
-                                    p.disposability}
-                                </span>
-                              )}
-                            </div>
-                          )}
                           {/* Price row */}
                           <div
                             style={{
