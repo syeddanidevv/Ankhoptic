@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma }        from "@/lib/db";
 import { requireAdmin }  from "@/lib/requireAdmin";
 import { v2 as cloudinary } from "cloudinary";
+import { sendMail }     from "@/lib/mailer";
+import { orderConfirmationTemplate, adminOrderNotificationTemplate } from "@/lib/emailTemplates";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -188,6 +190,53 @@ export async function POST(req: NextRequest) {
         })
       );
     }
+
+    // ── Send emails (fire-and-forget) ──────────────────────────────
+    const emailItems = (items as { title: string; unitPrice: number; addonPrice: number; addonName: string; qty: number }[]).map(it => ({
+      productTitle: it.title,
+      qty: it.qty,
+      unitPrice: it.unitPrice,
+      aftercarePrice: it.addonPrice ?? 0,
+    }));
+
+    // Customer confirmation
+    if (email) {
+      sendMail({
+        to: email,
+        subject: `Order Confirmed #${1000 + order.orderNumber} – Ankhoptic`,
+        html: orderConfirmationTemplate({
+          orderNumber: order.orderNumber,
+          name,
+          items: emailItems,
+          subtotal,
+          shippingCost,
+          discountAmount: 0,
+          total,
+          paymentMethod: mappedMethod,
+          city,
+          address,
+        }),
+      });
+    }
+
+    // Admin notification
+    sendMail({
+      to: process.env.ADMIN_NOTIFY_EMAIL ?? "info@ankhoptic.com",
+      subject: `🛒 New Order #${1000 + order.orderNumber} – Rs ${total.toLocaleString()}`,
+      html: adminOrderNotificationTemplate({
+        orderNumber: order.orderNumber,
+        name,
+        email: email ?? "",
+        phone: phone ?? "",
+        city,
+        address,
+        items: emailItems,
+        total,
+        paymentMethod: mappedMethod,
+        notes: notes ?? undefined,
+      }),
+    });
+    // ────────────────────────────────────────────────────────────────
 
     return NextResponse.json(order, { status: 201 });
   } catch (err) {
