@@ -1226,14 +1226,23 @@ export default function Products() {
                           <Link
                             href={`/products/${p.slug}`}
                             className="title link fw-6"
-                            style={{ display: "block" }}
                           >
-                            <span>{p.title}</span>
-                            <span style={{ fontWeight: 400, opacity: 0.7, fontSize: "0.85em", whiteSpace: "nowrap", marginLeft: "4px" }}>
-                              {p.color && <span style={{ textTransform: "capitalize" }}>- {p.color} </span>}
-                              {p.disposability && <span style={{ marginLeft: p.color ? 0 : "4px" }}>({DISPOSABILITY_LABELS[p.disposability] ?? p.disposability})</span>}
-                            </span>
+                            {p.title}
                           </Link>
+                          {(p.color || p.disposability) && (
+                            <div style={{ fontSize: 12, color: "#444", marginTop: 4, marginBottom: 4 }}>
+                              {p.color && (
+                                <div style={{ marginBottom: 2 }}>
+                                  <span style={{ fontWeight: 600 }}>Color:</span> <span style={{ textTransform: "capitalize" }}>{p.color}</span>
+                                </div>
+                              )}
+                              {p.disposability && (
+                                <div style={{ marginBottom: 2 }}>
+                                  <span style={{ fontWeight: 600 }}>Disposability:</span> {DISPOSABILITY_LABELS[p.disposability] ?? p.disposability}
+                                </div>
+                              )}
+                            </div>
+                          )}
                           {/* Price row */}
                           <div
                             style={{

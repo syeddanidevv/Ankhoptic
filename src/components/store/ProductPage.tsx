@@ -444,15 +444,21 @@ export default function ProductPage({ slug }: { slug: string }) {
                 <div className="tf-product-info-wrap position-relative product-info-sticky">
                   <div className="tf-product-info-list">
                     <div className="tf-product-info-title">
-                      <h2 style={{ display: "flex", alignItems: "baseline", flexWrap: "wrap", gap: "8px" }}>
-                        <span>{product.title}</span>
-                        {(product.color || product.disposability) && (
-                          <span style={{ fontWeight: 400, opacity: 0.7, fontSize: "0.65em" }}>
-                            {product.color && <span style={{ textTransform: "capitalize" }}>- {product.color} </span>}
-                            {product.disposability && <span style={{ marginLeft: product.color ? 0 : "4px" }}>({DISPOSABILITY_LABELS[product.disposability] ?? product.disposability})</span>}
-                          </span>
-                        )}
-                      </h2>
+                      <h2>{product.title}</h2>
+                      {(product.color || product.disposability) && (
+                        <div style={{ marginTop: "12px", fontSize: "14px", color: "#555" }}>
+                          {product.color && (
+                            <div style={{ marginBottom: "6px" }}>
+                              <strong>Color:</strong> <span style={{ textTransform: "capitalize" }}>{product.color}</span>
+                            </div>
+                          )}
+                          {product.disposability && (
+                            <div style={{ marginBottom: "6px" }}>
+                              <strong>Disposability:</strong> {DISPOSABILITY_LABELS[product.disposability] ?? product.disposability}
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
 
                     {product.brand && (
