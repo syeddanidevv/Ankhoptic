@@ -1,61 +1,126 @@
 /* ─────────────────────────────────────────────
    Ankhoptic – Email Templates
+   Brand: Dark navy (#020042) × clean white × minimal premium
    ───────────────────────────────────────────── */
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://ankhoptic.com";
 
-const wrapper = (content: string) => `
+// ── Shared wrapper matching Ankhoptic's brand ───────────────────────────────
+const wrapper = (content: string, preheader = "") => `
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <title>Ankhoptic</title>
+  <!--[if mso]><noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript><![endif]-->
   <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body { background:#f5f5f0; font-family: 'Segoe UI', Arial, sans-serif; color:#1a1a1a; }
-    a { color:#4f8a6e; text-decoration:none; }
+    body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; display: block; }
+    body { margin: 0 !important; padding: 0 !important; background-color: #f4f4f0; }
+    a { color: #020042; }
+    @media only screen and (max-width: 600px) {
+      .email-container { width: 100% !important; }
+      .stack-column, .stack-column-center { display: block !important; width: 100% !important; }
+      .center-on-mobile { text-align: center !important; }
+      .btn-full { width: 100% !important; text-align: center !important; }
+    }
   </style>
 </head>
-<body>
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f0; padding:32px 0;">
-    <tr><td align="center">
-      <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px; width:100%; background:#ffffff; border-radius:12px; overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,0.08);">
+<body style="margin:0; padding:0; background-color:#f4f4f0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
 
-        <!-- Header -->
-        <tr>
-          <td style="background:linear-gradient(135deg,#1a2e25 0%,#2d4f3c 100%); padding:32px 40px; text-align:center;">
-            <img src="${BASE_URL}/logo.png" alt="Ankhoptic" width="140" style="display:block; margin:0 auto 8px;" onerror="this.style.display='none'" />
-            <span style="font-size:26px; font-weight:700; color:#fff; letter-spacing:0.5px;">Ankhoptic</span>
-            <p style="color:#a3c4b0; font-size:12px; margin-top:4px;">Premium Contact Lenses & Eyewear</p>
-          </td>
-        </tr>
+  ${preheader ? `<div style="display:none; max-height:0; overflow:hidden; font-size:1px; color:#f4f4f0;">${preheader}&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;</div>` : ""}
 
-        <!-- Body -->
-        <tr>
-          <td style="padding:40px 40px 32px;">
-            ${content}
-          </td>
-        </tr>
+  <!-- Outer wrapper -->
+  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background:#f4f4f0; padding: 32px 16px;">
+    <tr>
+      <td align="center">
+        <!-- Email card -->
+        <table class="email-container" role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="max-width:600px; width:100%; background:#ffffff;">
 
-        <!-- Footer -->
-        <tr>
-          <td style="background:#f9f9f7; border-top:1px solid #eee; padding:24px 40px; text-align:center;">
-            <p style="font-size:12px; color:#999; line-height:1.8;">
-              &copy; ${new Date().getFullYear()} Ankhoptic. All rights reserved.<br/>
-              <a href="${BASE_URL}" style="color:#4f8a6e;">Visit our store</a>
-            </p>
-          </td>
-        </tr>
+          <!-- ════ HEADER ════ -->
+          <tr>
+            <td style="background:#020042; padding: 28px 40px; text-align:center;">
+              <!-- Logo image — falls back to text -->
+              <a href="${BASE_URL}" style="text-decoration:none;">
+                <img src="${BASE_URL}/store/images/logo/logo.jpg" alt="Ankhoptic" width="130" style="display:block; margin:0 auto; max-height:50px; width:auto; object-fit:contain;" />
+              </a>
+              <p style="margin:10px 0 0; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:rgba(255,255,255,0.45); font-weight:500;">Premium Eyewear · Pakistan</p>
+            </td>
+          </tr>
 
-      </table>
-    </td></tr>
+          <!-- ════ THIN ACCENT LINE ════ -->
+          <tr>
+            <td style="height:3px; background: linear-gradient(90deg, #020042 0%, #2a2aff 50%, #020042 100%);"></td>
+          </tr>
+
+          <!-- ════ BODY ════ -->
+          <tr>
+            <td style="padding: 40px 40px 36px; background:#ffffff;">
+              ${content}
+            </td>
+          </tr>
+
+          <!-- ════ DIVIDER ════ -->
+          <tr>
+            <td style="padding: 0 40px;">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr><td style="height:1px; background:#e8e8e4;"></td></tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- ════ FOOTER ════ -->
+          <tr>
+            <td style="padding: 24px 40px 32px; background:#ffffff; text-align:center;">
+              <!-- Social links -->
+              <p style="margin:0 0 12px;">
+                <a href="https://www.instagram.com/ankhoptics" style="display:inline-block; margin:0 6px; text-decoration:none; color:#020042; font-size:12px; font-weight:600; letter-spacing:0.5px;">INSTAGRAM</a>
+                <span style="color:#ccc;">|</span>
+                <a href="https://www.facebook.com/ankhoptics" style="display:inline-block; margin:0 6px; text-decoration:none; color:#020042; font-size:12px; font-weight:600; letter-spacing:0.5px;">FACEBOOK</a>
+                <span style="color:#ccc;">|</span>
+                <a href="${BASE_URL}/shop" style="display:inline-block; margin:0 6px; text-decoration:none; color:#020042; font-size:12px; font-weight:600; letter-spacing:0.5px;">SHOP NOW</a>
+              </p>
+              <p style="margin:0 0 4px; font-size:12px; color:#999; line-height:1.6;">
+                &copy; ${new Date().getFullYear()} Ankhoptic. All rights reserved.
+              </p>
+              <p style="margin:0; font-size:11px; color:#bbb; line-height:1.6;">
+                Karachi, Pakistan &nbsp;·&nbsp;
+                <a href="mailto:info@ankhoptic.com" style="color:#bbb; text-decoration:underline;">info@ankhoptic.com</a>
+              </p>
+            </td>
+          </tr>
+
+          <!-- ════ BOTTOM STRIP ════ -->
+          <tr>
+            <td style="height:6px; background:#020042;"></td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
   </table>
+
 </body>
 </html>
 `;
 
-/* ── Order Confirmation (Customer) ── */
+// ────────────────────────────────────────────────────────────────────────────
+// Helper: payment method label
+// ────────────────────────────────────────────────────────────────────────────
+const PAY_LABELS: Record<string, string> = {
+  COD: "Cash on Delivery",
+  EASYPAISA: "Easypaisa",
+  JAZZCASH: "JazzCash",
+  BANK_TRANSFER: "Bank Transfer",
+  CARD: "Card",
+};
+
+// ────────────────────────────────────────────────────────────────────────────
+// 1. ORDER CONFIRMATION — Customer
+// ────────────────────────────────────────────────────────────────────────────
 export function orderConfirmationTemplate(order: {
   orderNumber: number;
   name: string;
@@ -72,77 +137,120 @@ export function orderConfirmationTemplate(order: {
     .map(
       (item) => `
       <tr>
-        <td style="padding:10px 0; border-bottom:1px solid #f0f0f0; font-size:14px; color:#333;">${item.productTitle}</td>
-        <td style="padding:10px 0; border-bottom:1px solid #f0f0f0; text-align:center; font-size:14px; color:#666;">×${item.qty}</td>
-        <td style="padding:10px 0; border-bottom:1px solid #f0f0f0; text-align:right; font-size:14px; font-weight:600; color:#222;">Rs ${((item.unitPrice + (item.aftercarePrice ?? 0)) * item.qty).toLocaleString()}</td>
+        <td style="padding: 12px 0; border-bottom: 1px solid #f0f0ec; font-size: 14px; color: #1a1a1a; line-height:1.4;">
+          ${item.productTitle}
+        </td>
+        <td style="padding: 12px 0; border-bottom: 1px solid #f0f0ec; text-align: center; font-size: 14px; color: #888; white-space:nowrap;">
+          × ${item.qty}
+        </td>
+        <td style="padding: 12px 0; border-bottom: 1px solid #f0f0ec; text-align: right; font-size: 14px; font-weight: 600; color: #020042; white-space:nowrap;">
+          Rs ${((item.unitPrice + (item.aftercarePrice ?? 0)) * item.qty).toLocaleString()}
+        </td>
       </tr>`
     )
     .join("");
 
-  const payLabel: Record<string, string> = {
-    COD: "Cash on Delivery",
-    EASYPAISA: "Easypaisa",
-    JAZZCASH: "JazzCash",
-    BANK_TRANSFER: "Bank Transfer",
-    CARD: "Card",
-  };
+  const body = `
+    <!-- Greeting -->
+    <h1 style="margin: 0 0 6px; font-size: 24px; font-weight: 700; color: #020042; letter-spacing: -0.3px;">
+      Order Confirmed ✓
+    </h1>
+    <p style="margin: 0 0 28px; font-size: 15px; color: #555; line-height: 1.6;">
+      Thank you, <strong style="color:#020042;">${order.name}</strong>! Your order has been successfully placed and is being processed.
+    </p>
 
-  return wrapper(`
-    <h2 style="font-size:22px; font-weight:700; color:#1a2e25; margin-bottom:6px;">Order Confirmed 🎉</h2>
-    <p style="color:#555; font-size:14px; margin-bottom:28px;">Shukriya, <strong>${order.name}</strong>! Aapka order place ho gaya hai.</p>
-
-    <!-- Order number badge -->
-    <div style="background:#f0f7f4; border:1px solid #c5dfd3; border-radius:8px; padding:16px 20px; margin-bottom:28px; display:inline-block; width:100%;">
-      <p style="font-size:13px; color:#4f8a6e; margin-bottom:2px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Order Number</p>
-      <p style="font-size:24px; font-weight:800; color:#1a2e25;">#${1000 + order.orderNumber}</p>
-    </div>
+    <!-- Order badge -->
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom:28px;">
+      <tr>
+        <td style="background:#f7f7f4; border-left: 3px solid #020042; padding: 16px 20px;">
+          <p style="margin:0 0 2px; font-size:11px; text-transform:uppercase; letter-spacing:2px; color:#999; font-weight:600;">Order Reference</p>
+          <p style="margin:0; font-size:28px; font-weight:800; color:#020042; letter-spacing:-0.5px;">#${1000 + order.orderNumber}</p>
+        </td>
+      </tr>
+    </table>
 
     <!-- Items table -->
-    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
+    <p style="margin:0 0 10px; font-size:11px; text-transform:uppercase; letter-spacing:2px; color:#999; font-weight:600;">Order Summary</p>
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom:4px;">
       <thead>
-        <tr style="border-bottom:2px solid #eee;">
-          <th style="font-size:12px; font-weight:700; color:#999; text-transform:uppercase; padding-bottom:8px; text-align:left;">Item</th>
-          <th style="font-size:12px; font-weight:700; color:#999; text-transform:uppercase; padding-bottom:8px; text-align:center;">Qty</th>
-          <th style="font-size:12px; font-weight:700; color:#999; text-transform:uppercase; padding-bottom:8px; text-align:right;">Price</th>
+        <tr>
+          <th style="font-size:11px; font-weight:600; color:#bbb; text-transform:uppercase; letter-spacing:1px; padding:0 0 10px; text-align:left; border-bottom:2px solid #e8e8e4;">Product</th>
+          <th style="font-size:11px; font-weight:600; color:#bbb; text-transform:uppercase; letter-spacing:1px; padding:0 0 10px; text-align:center; border-bottom:2px solid #e8e8e4;">Qty</th>
+          <th style="font-size:11px; font-weight:600; color:#bbb; text-transform:uppercase; letter-spacing:1px; padding:0 0 10px; text-align:right; border-bottom:2px solid #e8e8e4;">Total</th>
         </tr>
       </thead>
       <tbody>${itemRows}</tbody>
     </table>
 
     <!-- Totals -->
-    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: 4px 0 28px;">
       <tr>
-        <td style="font-size:13px; color:#666; padding:4px 0;">Subtotal</td>
-        <td style="font-size:13px; color:#333; text-align:right; padding:4px 0;">Rs ${order.subtotal.toLocaleString()}</td>
+        <td style="font-size:13px; color:#888; padding:6px 0 4px; text-align:left;">Subtotal</td>
+        <td style="font-size:13px; color:#555; padding:6px 0 4px; text-align:right;">Rs ${order.subtotal.toLocaleString()}</td>
       </tr>
       <tr>
-        <td style="font-size:13px; color:#666; padding:4px 0;">Shipping</td>
-        <td style="font-size:13px; color:#333; text-align:right; padding:4px 0;">${order.shippingCost === 0 ? "<span style='color:#4f8a6e;'>Free</span>" : `Rs ${order.shippingCost}`}</td>
+        <td style="font-size:13px; color:#888; padding:4px 0; text-align:left;">Shipping</td>
+        <td style="font-size:13px; text-align:right; padding:4px 0; color:${order.shippingCost === 0 ? "#28a745" : "#555"};">
+          ${order.shippingCost === 0 ? "Free" : `Rs ${order.shippingCost}`}
+        </td>
       </tr>
-      ${order.discountAmount ? `<tr><td style="font-size:13px; color:#4f8a6e; padding:4px 0;">Discount</td><td style="font-size:13px; color:#4f8a6e; text-align:right; padding:4px 0;">– Rs ${order.discountAmount.toLocaleString()}</td></tr>` : ""}
-      <tr style="border-top:2px solid #eee;">
-        <td style="font-size:16px; font-weight:800; color:#1a2e25; padding-top:10px;">Total</td>
-        <td style="font-size:16px; font-weight:800; color:#1a2e25; text-align:right; padding-top:10px;">Rs ${order.total.toLocaleString()}</td>
+      ${order.discountAmount ? `
+      <tr>
+        <td style="font-size:13px; color:#888; padding:4px 0; text-align:left;">Discount</td>
+        <td style="font-size:13px; color:#28a745; text-align:right; padding:4px 0;">− Rs ${order.discountAmount.toLocaleString()}</td>
+      </tr>` : ""}
+      <tr>
+        <td colspan="2" style="height:1px; background:#e8e8e4; padding:0;"></td>
+      </tr>
+      <tr>
+        <td style="font-size:16px; font-weight:800; color:#020042; padding:10px 0 0; text-align:left;">Total</td>
+        <td style="font-size:16px; font-weight:800; color:#020042; padding:10px 0 0; text-align:right;">Rs ${order.total.toLocaleString()}</td>
       </tr>
     </table>
 
-    <!-- Delivery info -->
-    <div style="background:#fafafa; border:1px solid #eee; border-radius:8px; padding:16px 20px; margin-bottom:28px;">
-      <p style="font-size:13px; font-weight:700; color:#333; margin-bottom:8px;">Delivery Details</p>
-      <p style="font-size:13px; color:#555; line-height:1.7;">
-        📍 ${order.address}, ${order.city}<br/>
-        💳 Payment: ${payLabel[order.paymentMethod] ?? order.paymentMethod}
-      </p>
-    </div>
+    <!-- Delivery details -->
+    <p style="margin:0 0 10px; font-size:11px; text-transform:uppercase; letter-spacing:2px; color:#999; font-weight:600;">Delivery Details</p>
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom:28px;">
+      <tr>
+        <td style="background:#f7f7f4; padding:16px 20px;">
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+            <tr>
+              <td width="50%" style="font-size:12px; color:#999; padding-bottom:4px; text-transform:uppercase; letter-spacing:1px;">Address</td>
+              <td width="50%" style="font-size:12px; color:#999; padding-bottom:4px; text-transform:uppercase; letter-spacing:1px;">Payment</td>
+            </tr>
+            <tr>
+              <td width="50%" style="font-size:14px; color:#1a1a1a; font-weight:500; padding-right:16px;">${order.address}, ${order.city}</td>
+              <td width="50%" style="font-size:14px; color:#1a1a1a; font-weight:500;">${PAY_LABELS[order.paymentMethod] ?? order.paymentMethod}</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
 
-    <p style="font-size:13px; color:#888; line-height:1.7;">
-      Agar koi question ho toh <a href="mailto:info@ankhoptic.com">info@ankhoptic.com</a> pe email karein ya WhatsApp karein.<br/>
-      Aapka order 2–4 business days mein deliver ho jaye ga. 🚚
+    <!-- CTA -->
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin-bottom:28px;">
+      <tr>
+        <td style="background:#020042; padding: 0;">
+          <a href="${BASE_URL}/account/orders" style="display:inline-block; padding:14px 32px; font-size:13px; font-weight:700; color:#ffffff; text-decoration:none; letter-spacing:1px; text-transform:uppercase;">
+            Track My Order →
+          </a>
+        </td>
+      </tr>
+    </table>
+
+    <!-- Note -->
+    <p style="margin:0; font-size:13px; color:#999; line-height:1.8;">
+      Questions? Email us at <a href="mailto:info@ankhoptic.com" style="color:#020042; font-weight:600;">info@ankhoptic.com</a><br/>
+      Expected delivery: <strong style="color:#555;">2–4 business days</strong> across Pakistan.
     </p>
-  `);
+  `;
+
+  return wrapper(body, `Your Ankhoptic order #${1000 + order.orderNumber} is confirmed — thank you for shopping with us!`);
 }
 
-/* ── New Order Notification (Admin) ── */
+// ────────────────────────────────────────────────────────────────────────────
+// 2. NEW ORDER NOTIFICATION — Admin
+// ────────────────────────────────────────────────────────────────────────────
 export function adminOrderNotificationTemplate(order: {
   orderNumber: number;
   name: string;
@@ -159,49 +267,103 @@ export function adminOrderNotificationTemplate(order: {
     .map(
       (item) => `
       <tr>
-        <td style="padding:8px 0; border-bottom:1px solid #f0f0f0; font-size:13px;">${item.productTitle}</td>
-        <td style="padding:8px 0; border-bottom:1px solid #f0f0f0; text-align:center; font-size:13px;">×${item.qty}</td>
-        <td style="padding:8px 0; border-bottom:1px solid #f0f0f0; text-align:right; font-size:13px; font-weight:600;">Rs ${((item.unitPrice + (item.aftercarePrice ?? 0)) * item.qty).toLocaleString()}</td>
+        <td style="padding:10px 0; border-bottom:1px solid #f0f0ec; font-size:13px; color:#1a1a1a;">${item.productTitle}</td>
+        <td style="padding:10px 0; border-bottom:1px solid #f0f0ec; text-align:center; font-size:13px; color:#888;">×${item.qty}</td>
+        <td style="padding:10px 0; border-bottom:1px solid #f0f0ec; text-align:right; font-size:13px; font-weight:600; color:#020042;">
+          Rs ${((item.unitPrice + (item.aftercarePrice ?? 0)) * item.qty).toLocaleString()}
+        </td>
       </tr>`
     )
     .join("");
 
   const adminUrl = `${BASE_URL}/admin/orders`;
 
-  return wrapper(`
-    <h2 style="font-size:20px; font-weight:700; color:#1a2e25; margin-bottom:4px;">🛒 New Order Received!</h2>
-    <p style="color:#555; font-size:14px; margin-bottom:24px;">Order <strong>#${1000 + order.orderNumber}</strong> has just been placed.</p>
+  const body = `
+    <!-- Alert strip -->
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom:24px;">
+      <tr>
+        <td style="background:#020042; padding:14px 20px; text-align:center;">
+          <p style="margin:0; font-size:13px; font-weight:700; color:#ffffff; text-transform:uppercase; letter-spacing:2px;">🛒 New Order Received</p>
+        </td>
+      </tr>
+    </table>
+
+    <h1 style="margin:0 0 4px; font-size:22px; font-weight:800; color:#020042;">Order #${1000 + order.orderNumber}</h1>
+    <p style="margin:0 0 24px; font-size:14px; color:#888;">Placed just now — review and process it in your admin panel.</p>
+
+    <!-- Total highlight -->
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom:24px;">
+      <tr>
+        <td style="background:#f7f7f4; border-left:3px solid #020042; padding:14px 20px;">
+          <p style="margin:0 0 2px; font-size:11px; color:#999; text-transform:uppercase; letter-spacing:2px;">Order Total</p>
+          <p style="margin:0; font-size:26px; font-weight:800; color:#020042;">Rs ${order.total.toLocaleString()}</p>
+          <p style="margin:4px 0 0; font-size:13px; color:#888;">${PAY_LABELS[order.paymentMethod] ?? order.paymentMethod}</p>
+        </td>
+      </tr>
+    </table>
 
     <!-- Customer info -->
-    <div style="background:#f0f7f4; border:1px solid #c5dfd3; border-radius:8px; padding:16px 20px; margin-bottom:24px;">
-      <p style="font-size:13px; font-weight:700; color:#1a2e25; margin-bottom:8px;">Customer Details</p>
-      <p style="font-size:13px; color:#555; line-height:1.8;">
-        👤 <strong>${order.name}</strong><br/>
-        📧 ${order.email}<br/>
-        📞 ${order.phone}<br/>
-        📍 ${order.address}, ${order.city}
-      </p>
-      ${order.notes ? `<p style="font-size:13px; color:#888; margin-top:8px; font-style:italic;">Note: ${order.notes}</p>` : ""}
-    </div>
+    <p style="margin:0 0 10px; font-size:11px; text-transform:uppercase; letter-spacing:2px; color:#999; font-weight:600;">Customer</p>
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom:24px;">
+      <tr>
+        <td style="background:#f7f7f4; padding:16px 20px;">
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+            <tr>
+              <td width="50%" style="font-size:13px; color:#555; line-height:1.8; padding-right:16px;">
+                <strong style="color:#1a1a1a;">${order.name}</strong><br/>
+                ${order.email}<br/>
+                ${order.phone}
+              </td>
+              <td width="50%" style="font-size:13px; color:#555; line-height:1.8;">
+                <strong style="color:#1a1a1a;">Delivery</strong><br/>
+                ${order.address}<br/>
+                ${order.city}
+              </td>
+            </tr>
+            ${order.notes ? `
+            <tr>
+              <td colspan="2" style="font-size:12px; color:#888; padding-top:10px; border-top:1px solid #e8e8e4; margin-top:10px; font-style:italic;">
+                Note: ${order.notes}
+              </td>
+            </tr>` : ""}
+          </table>
+        </td>
+      </tr>
+    </table>
 
     <!-- Items -->
-    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
+    <p style="margin:0 0 10px; font-size:11px; text-transform:uppercase; letter-spacing:2px; color:#999; font-weight:600;">Items Ordered</p>
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom:20px;">
       <thead>
-        <tr style="border-bottom:2px solid #eee;">
-          <th style="font-size:12px; color:#999; text-transform:uppercase; padding-bottom:6px; text-align:left;">Product</th>
-          <th style="font-size:12px; color:#999; text-transform:uppercase; padding-bottom:6px; text-align:center;">Qty</th>
-          <th style="font-size:12px; color:#999; text-transform:uppercase; padding-bottom:6px; text-align:right;">Amount</th>
+        <tr>
+          <th style="font-size:11px; color:#bbb; text-transform:uppercase; letter-spacing:1px; padding-bottom:8px; text-align:left; border-bottom:2px solid #e8e8e4;">Product</th>
+          <th style="font-size:11px; color:#bbb; text-transform:uppercase; letter-spacing:1px; padding-bottom:8px; text-align:center; border-bottom:2px solid #e8e8e4;">Qty</th>
+          <th style="font-size:11px; color:#bbb; text-transform:uppercase; letter-spacing:1px; padding-bottom:8px; text-align:right; border-bottom:2px solid #e8e8e4;">Amount</th>
         </tr>
       </thead>
       <tbody>${itemRows}</tbody>
     </table>
 
-    <p style="font-size:16px; font-weight:800; color:#1a2e25; text-align:right; margin-bottom:28px;">Total: Rs ${order.total.toLocaleString()}</p>
+    <!-- Grand total row -->
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom:28px;">
+      <tr>
+        <td style="text-align:right; font-size:16px; font-weight:800; color:#020042;">
+          Total: Rs ${order.total.toLocaleString()}
+        </td>
+      </tr>
+    </table>
 
-    <div style="text-align:center;">
-      <a href="${adminUrl}" style="display:inline-block; background:#1a2e25; color:#fff; font-size:14px; font-weight:700; padding:14px 32px; border-radius:8px; text-decoration:none;">
-        View in Admin Panel →
-      </a>
-    </div>
-  `);
+    <!-- CTA -->
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+      <tr>
+        <td style="background:#020042;">
+          <a href="${adminUrl}" style="display:inline-block; padding:14px 32px; font-size:13px; font-weight:700; color:#ffffff; text-decoration:none; letter-spacing:1px; text-transform:uppercase;">
+            Open in Admin Panel →
+          </a>
+        </td>
+      </tr>
+    </table>
+  `;
+
+  return wrapper(body, `New order #${1000 + order.orderNumber} – Rs ${order.total.toLocaleString()} — action required.`);
 }
