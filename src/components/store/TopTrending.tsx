@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import Image from "next/image";
+
 import { useEffect, useRef, useState } from "react";
 import { useQuickView } from "@/context/QuickViewContext";
 
@@ -38,13 +38,12 @@ function ProductCard({ p }: { p: Product }) {
       {p.discountTitle && <div className="box-badge">{p.discountTitle}</div>}
       <div className="card-product-wrapper">
         <Link href={`/products/${p.slug}`} className="product-img">
-          <Image
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
             className="img-product"
             src={p.images[0] ?? PLACEHOLDER}
             alt={p.title}
-            width={600}
-            height={600}
-            style={{ objectFit: "cover" }}
+            style={{ objectFit: "cover", width: "100%", height: "100%" }}
           />
         </Link>
         <div className="list-product-btn">
