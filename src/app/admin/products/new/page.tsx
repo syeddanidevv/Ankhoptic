@@ -195,9 +195,12 @@ function ProductForm() {
       errs.productType = "Please select a product type";
     }
 
+    // Lens and Glasses specific required fields
+    if (form.productType === "LENS" || form.productType === "GLASSES") {
+      if (!form.color) errs.color = `Color is required for ${form.productType.toLowerCase()}`;
+    }
     // Lens-specific required fields
     if (form.productType === "LENS") {
-      if (!form.color) errs.color = "Color is required for lenses";
       if (!form.disposability)
         errs.disposability = "Disposability is required for lenses";
     }
@@ -241,6 +244,7 @@ function ProductForm() {
       const finalImages = [...images, ...uploadedUrls];
 
       const isLens = form.productType === "LENS";
+      const isGlasses = form.productType === "GLASSES";
       const payload: any = {
         title: form.title,
         slug: form.slug || toSlug(form.title),
@@ -248,7 +252,7 @@ function ProductForm() {
         productType: form.productType,
         price: parseFloat(form.price),
         comparePrice: form.comparePrice ? parseFloat(form.comparePrice) : null,
-        color: isLens && form.color ? form.color.toUpperCase() : null,
+        color: (isLens || isGlasses) && form.color ? form.color.toUpperCase() : null,
         images: finalImages,
         inStock: form.inStock,
         enableAddons: form.enableAddons,
@@ -543,38 +547,42 @@ function ProductForm() {
                   )}
                 </FormField>
 
+                {/* Color field for Lens and Glasses */}
+                {(form.productType === "LENS" || form.productType === "GLASSES") && (
+                  <FormField label="Color" required>
+                    <SelectField
+                      placeholder={
+                        !lensConfig || lensConfig.lens_colors.length === 0
+                          ? "No colors configured"
+                          : "Select color"
+                      }
+                      value={form.color}
+                      onChange={(e) => set("color", e.target.value)}
+                      options={lensConfig?.lens_colors ?? []}
+                      isInvalid={!!fieldErrors.color}
+                      disabled={
+                        !lensConfig || lensConfig.lens_colors.length === 0
+                      }
+                    />
+                    {!lensConfig || lensConfig.lens_colors.length === 0 ? (
+                      <Text fontSize="11.5px" color={T.sub} mt={1}>
+                        Configure colors in{" "}
+                        <NextLink
+                          href="/admin/settings"
+                          style={{ color: T.green, fontWeight: 600 }}
+                        >
+                          Settings
+                        </NextLink>
+                      </Text>
+                    ) : (
+                      <FieldError msg={fieldErrors.color} />
+                    )}
+                  </FormField>
+                )}
+
                 {/* Lens-only fields */}
                 {form.productType === "LENS" && (
                   <>
-                    <FormField label="Color" required>
-                      <SelectField
-                        placeholder={
-                          !lensConfig || lensConfig.lens_colors.length === 0
-                            ? "No colors configured"
-                            : "Select color"
-                        }
-                        value={form.color}
-                        onChange={(e) => set("color", e.target.value)}
-                        options={lensConfig?.lens_colors ?? []}
-                        isInvalid={!!fieldErrors.color}
-                        disabled={
-                          !lensConfig || lensConfig.lens_colors.length === 0
-                        }
-                      />
-                      {!lensConfig || lensConfig.lens_colors.length === 0 ? (
-                        <Text fontSize="11.5px" color={T.sub} mt={1}>
-                          Configure colors in{" "}
-                          <NextLink
-                            href="/admin/settings"
-                            style={{ color: T.green, fontWeight: 600 }}
-                          >
-                            Lens Settings
-                          </NextLink>
-                        </Text>
-                      ) : (
-                        <FieldError msg={fieldErrors.color} />
-                      )}
-                    </FormField>
                     <FormField label="Disposability" required>
                       <SelectField
                         placeholder={
