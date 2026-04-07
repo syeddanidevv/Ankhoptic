@@ -446,7 +446,7 @@ function ProductForm() {
             >
               {/* ── Type toggle ── */}
               <Flex gap={2} mb={5}>
-                {(["LENS", "GLASSES", "ACCESSORY"] as const).map((type) => {
+                {(["LENS", "GLASSES"] as const).map((type) => {
                   const active = form.productType === type;
                   return (
                     <Box
@@ -470,9 +470,7 @@ function ProductForm() {
                     >
                       {type === "LENS"
                         ? "🔍 Lenses"
-                        : type === "GLASSES"
-                        ? "👓 Glasses"
-                        : "👜 Accessory"}
+                        : "👓 Glasses"}
                     </Box>
                   );
                 })}

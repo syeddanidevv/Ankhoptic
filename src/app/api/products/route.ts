@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
         price:        parseFloat(body.price),
         comparePrice: body.comparePrice ? parseFloat(body.comparePrice) : null,
         color:        body.color ?? null,
-        disposability: body.disposability ?? null,
+        disposability: body.disposability ?? "ONE_DAY",
         inStock:      true, // Always true for now as requested
         stockCount:   parseInt(body.stockCount ?? "0"),
         images:       JSON.stringify(body.images ?? []),
@@ -80,7 +80,9 @@ export async function POST(req: NextRequest) {
       images: product.images ? JSON.parse(product.images) : [],
     };
     return NextResponse.json(parsedProduct, { status: 201 });
-  } catch {
+  } catch (err) {
+    console.error("POST /api/products ERROR:", err);
     return NextResponse.json({ error: "Failed to create product" }, { status: 500 });
   }
 }
+
