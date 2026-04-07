@@ -141,7 +141,7 @@ export default function Checkout() {
         customerId: session?.user ? (session.user as { id?: string }).id : null,
         items: items.map(it => ({
           slug: it.slug,
-          title: `[${it.brand}] ${it.title} - ${it.color}`,
+          title: `${it.brand ? `[${it.brand}] ` : ""}${it.title}${it.color ? ` - ${it.color}` : ""}`,
           lensType: it.lensType,
           power: it.power,
           addonName: it.addonName,
@@ -340,7 +340,7 @@ export default function Checkout() {
                         </figure>
                         <div className="content">
                           <div className="info">
-                            <p className="name">{it.title} - {it.color}</p>
+                            <p className="name">{it.title}{it.color ? ` - ${it.color}` : ""}</p>
                             <span className="variant" style={{ display: 'flex', flexDirection: 'column', fontSize: '0.85rem' }}>
                               <span>Lens: {it.lensType} {it.power && `(${it.power})`}</span>
                               {it.addonName !== "No aftercare" && <span>Addon: {it.addonName}</span>}

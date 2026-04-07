@@ -264,6 +264,32 @@ export default function MyOrderDetail({ orderId }: { orderId: string }) {
                   <p className="text-2">{addr?.phone || "—"}</p>
                 </div>
 
+                {/* Payment Info */}
+                <div
+                  className="mt_20"
+                  style={{
+                    background: "#f8f8f8",
+                    borderRadius: 8,
+                    padding: "16px 20px",
+                  }}
+                >
+                  <h6 className="mb_10">Payment Info</h6>
+                  <p className="text-2">
+                    Method:{" "}
+                    <strong>
+                      {order.paymentMethod === "COD"
+                        ? "Cash on Delivery"
+                        : order.paymentMethod === "BANK_TRANSFER"
+                        ? "Bank Transfer"
+                        : order.paymentMethod || "COD"}
+                    </strong>
+                  </p>
+                  <div className="d-flex align-items-center gap-2 mt_5">
+                    <p className="text-2 mb-0">Status:</p>
+                    <StatusBadge status={order.paymentStatus || "UNPAID"} />
+                  </div>
+                </div>
+
                 <div className="mt_20">
                   <Link
                     href="/account/orders"
