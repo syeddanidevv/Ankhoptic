@@ -320,10 +320,16 @@ export default function OrderDetailPage() {
     }
   };
 
-  const customerName = order?.customer?.name ?? order?.shippingAddress?.name ?? "Guest";
-  const customerEmail = order?.customer?.email ?? order?.shippingAddress?.email ?? "—";
-  const customerPhone = order?.shippingAddress?.phone ?? "—";
-  const addr = order?.shippingAddress;
+  let addr: any = null;
+  if (order?.shippingAddress) {
+    try {
+      addr = typeof order.shippingAddress === 'string' ? JSON.parse(order.shippingAddress) : order.shippingAddress;
+    } catch(e) {}
+  }
+
+  const customerName = order?.customer?.name ?? (addr ? addr.name : "Guest");
+  const customerEmail = order?.customer?.email ?? (addr ? addr.email : "—");
+  const customerPhone = addr ? addr.phone : "—";
 
   if (loading) return <AdminLoader message="Loading order..." />;
   if (!order)
@@ -544,7 +550,16 @@ export default function OrderDetailPage() {
               </Flex>
 
               <Box px={{ base: 3, md: 5 }}>
-                {order.items.map((item, i) => (
+                {order.items.map((item, i) => {
+                  let parsedImages: string[] = [];
+                  if (item.product?.images) {
+                    try {
+                      parsedImages = typeof item.product.images === 'string' ? JSON.parse(item.product.images) : item.product.images;
+                    } catch(e) {}
+                  }
+                  const firstImg = parsedImages[0];
+                  
+                  return (
                   <Box
                     key={item.id}
                     py={4}
@@ -564,12 +579,10 @@ export default function OrderDetailPage() {
                         justifyContent="center"
                         fontSize="22px"
                       >
-                        {item.product?.images?.[0] ? (
-                          <NextImage
-                            src={item.product.images[0]}
+                        {firstImg ? (
+                          <img
+                            src={firstImg.startsWith('http') || firstImg.startsWith('/') ? firstImg : `/${firstImg}`}
                             alt={item.productTitle}
-                            width={52}
-                            height={52}
                             style={{ width: "100%", height: "100%", objectFit: "cover" }}
                           />
                         ) : "👁️"}
@@ -738,7 +751,8 @@ export default function OrderDetailPage() {
                       </VStack>
                     </Flex>
                   </Box>
-                ))}
+                  );
+                })}
               </Box>
 
               {/* Pricing summary */}

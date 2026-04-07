@@ -108,6 +108,15 @@ export default function MyOrderDetail({ orderId }: { orderId: string }) {
 
   const firstImage = order.items[0]?.productImage;
 
+  let addr: any = {};
+  if (order.shippingAddress) {
+    try {
+      addr = typeof order.shippingAddress === 'string' ? JSON.parse(order.shippingAddress) : order.shippingAddress;
+    } catch {
+      addr = {};
+    }
+  }
+
   return (
     <>
       <div className="tf-page-title">
@@ -129,7 +138,7 @@ export default function MyOrderDetail({ orderId }: { orderId: string }) {
                     <figure className="img-product">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={firstImage}
+                        src={firstImage.startsWith('http') || firstImage.startsWith('/') ? firstImage : `/${firstImage}`}
                         alt="product"
                         style={{
                           objectFit: "cover",
@@ -164,7 +173,7 @@ export default function MyOrderDetail({ orderId }: { orderId: string }) {
                       {item.productImage && (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
-                          src={item.productImage}
+                          src={item.productImage.startsWith('http') || item.productImage.startsWith('/') ? item.productImage : `/${item.productImage}`}
                           alt={item.productTitle}
                           style={{
                             width: 50,
@@ -246,13 +255,13 @@ export default function MyOrderDetail({ orderId }: { orderId: string }) {
                   }}
                 >
                   <h6 className="mb_10">Shipping To</h6>
-                  <p className="text-2">{order.shippingAddress?.name}</p>
-                  <p className="text-2">{order.shippingAddress?.line1}</p>
+                  <p className="text-2">{addr?.name || "—"}</p>
+                  <p className="text-2">{addr?.line1 || addr?.address || "—"}</p>
                   <p className="text-2">
-                    {order.shippingAddress?.city},{" "}
-                    {order.shippingAddress?.province}
+                    {addr?.city || "—"},{" "}
+                    {addr?.province || "—"}
                   </p>
-                  <p className="text-2">{order.shippingAddress?.phone}</p>
+                  <p className="text-2">{addr?.phone || "—"}</p>
                 </div>
 
                 <div className="mt_20">

@@ -1,5 +1,6 @@
 import React from "react";
 import { prisma } from "@/lib/db";
+import ContactForm from "@/components/store/ContactForm";
 
 export const metadata = {
   title: "Contact Us | Ankhoptics",
@@ -128,49 +129,7 @@ export default async function ContactPage() {
             </p>
           </div>
           <div>
-            <form
-              className="mw-705 mx-auto text-center form-contact"
-              action="#"
-            >
-              <div className="d-flex gap-15 mb_15">
-                <fieldset className="w-100">
-                  <input
-                    type="text"
-                    name="name"
-                    id="name"
-                    required
-                    placeholder="Name *"
-                  />
-                </fieldset>
-                <fieldset className="w-100">
-                  <input
-                    type="email"
-                    name="email"
-                    id="email"
-                    required
-                    placeholder="Email *"
-                  />
-                </fieldset>
-              </div>
-              <div className="mb_15">
-                <textarea
-                  placeholder="Message"
-                  name="message"
-                  id="message"
-                  required
-                  cols={30}
-                  rows={10}
-                ></textarea>
-              </div>
-              <div className="send-wrap">
-                <button
-                  type="submit"
-                  className="tf-btn radius-3 btn-fill animate-hover-btn justify-content-center"
-                >
-                  Send
-                </button>
-              </div>
-            </form>
+            <ContactForm />
           </div>
         </div>
       </section>
