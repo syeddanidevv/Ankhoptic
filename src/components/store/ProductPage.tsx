@@ -529,8 +529,7 @@ export default function ProductPage({ slug }: { slug: string }) {
                     <hr className="my-4" />
 
                     {/* ── Lens Type ── */}
-                    {product.productType !== "GLASSES" && (
-                      <>
+                    <>
                       <div style={{ marginBottom: 16 }}>
                       <div
                         style={{
@@ -956,10 +955,9 @@ export default function ProductPage({ slug }: { slug: string }) {
                       </div>
                     </div>
                       </>
-                    )}
 
                     {/* ── Aftercare Addons ── */}
-                    {product.productType !== "GLASSES" && (
+                    <>
                       <div style={{ marginBottom: 20, marginTop: 8 }}>
                         <div
                           style={{
@@ -1017,7 +1015,7 @@ export default function ProductPage({ slug }: { slug: string }) {
                           </div>
                         )}
                       </div>
-                    )}
+                    </>
 
                     <div
                       className="tf-product-info-quantity"

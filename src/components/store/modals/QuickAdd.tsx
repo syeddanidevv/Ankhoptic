@@ -328,9 +328,7 @@ export default function QuickAdd() {
                     )}
                   </div>
 
-                  {product?.productType !== "GLASSES" && (
-                    <>
-                    {/* ── Lens Type ── */}
+                  {/* ── Lens Type ── */}
                   <div style={{ marginBottom: 16 }}>
                     <div
                       style={{
@@ -793,8 +791,6 @@ export default function QuickAdd() {
                       </div>
                     )}
                   </div>
-                  </>
-                  )}
 
                   {/* Quantity */}
                   <div className="tf-product-info-quantity">
