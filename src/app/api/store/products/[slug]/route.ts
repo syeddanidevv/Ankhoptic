@@ -34,7 +34,11 @@ export async function GET(
     ]);
 
     if (!product) return NextResponse.json({ error: "Not found" }, { status: 404 });
-    const enriched = applyDiscountToProduct(product, activeDiscounts);
+    const parsed = {
+      ...product,
+      images: product.images ? (() => { try { return JSON.parse(product.images!); } catch { return []; } })() : [],
+    };
+    const enriched = applyDiscountToProduct(parsed, activeDiscounts);
     return NextResponse.json({ ...enriched, addons });
   } catch (err) {
     console.error("[GET /api/store/products/[slug]]", err);

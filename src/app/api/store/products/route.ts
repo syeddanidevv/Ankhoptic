@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
 
     const where = {
       status: "ACTIVE" as const,
-      ...(productType  ? { productType: productType as any } : {}),
+      ...(productType  ? { productType: productType as "LENS" | "GLASSES" | "ACCESSORY" } : {}),
       ...(color        ? { color }                          : {}),
       ...(disposability? { disposability }                  : {}),
       ...(featured     ? { featured: true }                 : {}),
@@ -49,8 +49,12 @@ export async function GET(req: NextRequest) {
       getActiveAutomaticDiscounts(),
     ]);
 
-    // Compute effective comparePrice and price for each product
-    const enriched = products.map((p) => applyDiscountToProduct(p, activeDiscounts));
+    // Parse images JSON string → array, then apply discounts
+    const parsed = products.map((p) => ({
+      ...p,
+      images: p.images ? (() => { try { return JSON.parse(p.images); } catch { return []; } })() : [],
+    }));
+    const enriched = parsed.map((p) => applyDiscountToProduct(p, activeDiscounts));
 
     return NextResponse.json({ products: enriched, total, page, limit });
   } catch (err) {
