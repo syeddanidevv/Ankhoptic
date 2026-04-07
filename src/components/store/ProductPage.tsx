@@ -358,6 +358,8 @@ export default function ProductPage({ slug }: { slug: string }) {
                       position: "relative",
                       overflow: "hidden",
                       borderRadius: 12,
+                      aspectRatio: "1 / 1",
+                      backgroundColor: "#f5f5f5"
                     }}
                   >
                     <Image

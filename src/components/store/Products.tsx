@@ -1156,8 +1156,10 @@ export default function Products() {
               >
                 {products.map((p) => {
                   const onSale = p.comparePrice && p.comparePrice > p.price;
+                  const hasMultipleImages = p.images && p.images.length > 1;
+
                   return (
-                    <div key={p.id} className="card-product style-9">
+                    <div key={p.id} className={`card-product style-9 ${!hasMultipleImages ? "none-hover" : ""}`}>
                       {/* Ribbon discount badge — sits on card-product so it's not overflow-clipped */}
                       {p.discountTitle && (
                         <div className="box-badge">{p.discountTitle}</div>
@@ -1166,6 +1168,7 @@ export default function Products() {
                         <Link
                           href={`/products/${p.slug}`}
                           className="product-img"
+                          style={{ display: "block", aspectRatio: "1 / 1", backgroundColor: "#f5f5f5" }}
                         >
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
@@ -1174,13 +1177,15 @@ export default function Products() {
                             alt={p.title}
                             style={{ objectFit: "cover", width: "100%", height: "100%" }}
                           />
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            className="img-hover"
-                            src={p.images?.[1] ?? p.images?.[0] ?? PLACEHOLDER}
-                            alt={p.title}
-                            style={{ objectFit: "cover" }}
-                          />
+                          {hasMultipleImages && (
+                            /* eslint-disable-next-line @next/next/no-img-element */
+                            <img
+                              className="img-hover"
+                              src={p.images?.[1]}
+                              alt={p.title}
+                              style={{ objectFit: "cover", width: "100%", height: "100%" }}
+                            />
+                          )}
                         </Link>
                         {p.featured && !onSale && (
                           <div className="badges-on-sale">

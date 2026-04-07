@@ -32,12 +32,17 @@ const DISPOSABILITY_LABELS: Record<string, string> = {
 function ProductCard({ p }: { p: Product }) {
   const { setProduct } = useQuickView();
   const onSale = p.comparePrice && p.comparePrice > p.price;
+  const hasMultipleImages = p.images && p.images.length > 1;
   return (
-    <div className="card-product style-9">
+    <div className={`card-product style-9 ${!hasMultipleImages ? "none-hover" : ""}`}>
       {/* Ribbon discount badge */}
       {p.discountTitle && <div className="box-badge">{p.discountTitle}</div>}
       <div className="card-product-wrapper">
-        <Link href={`/products/${p.slug}`} className="product-img">
+        <Link 
+          href={`/products/${p.slug}`} 
+          className="product-img" 
+          style={{ display: "block", aspectRatio: "1 / 1", backgroundColor: "#f5f5f5" }}
+        >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             className="img-product"
@@ -45,6 +50,15 @@ function ProductCard({ p }: { p: Product }) {
             alt={p.title}
             style={{ objectFit: "cover", width: "100%", height: "100%" }}
           />
+          {hasMultipleImages && (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img
+              className="img-hover"
+              src={p.images[1]}
+              alt={p.title}
+              style={{ objectFit: "cover", width: "100%", height: "100%" }}
+            />
+          )}
         </Link>
         <div className="list-product-btn">
           <Link
