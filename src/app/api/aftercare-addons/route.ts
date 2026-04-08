@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
   const authErr = await requireAdmin();
   if (authErr) return authErr;
   try {
-    const { name, extraCharge, retailPrice, description, image } = await req.json();
+    const { name, extraCharge, retailPrice, description, image, appliesTo } = await req.json();
     if (!name || extraCharge == null || retailPrice == null) {
       return NextResponse.json({ error: "name, extraCharge and retailPrice are required" }, { status: 400 });
     }
@@ -32,6 +32,7 @@ export async function POST(req: NextRequest) {
         retailPrice: parseFloat(retailPrice),
         description: description?.trim() || null,
         image: image || null,
+        appliesTo: appliesTo || "LENS",
         position: count,
       },
     });

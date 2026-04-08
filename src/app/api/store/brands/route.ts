@@ -34,6 +34,35 @@ export async function GET(request: NextRequest) {
         },
       },
     });
+    const unbrandedCategories = await prisma.category.findMany({
+      where: {
+        brandId: null,
+        products: type ? { some: { productType: type, status: "ACTIVE" } } : { some: { status: "ACTIVE" } },
+      },
+      select: { id: true, name: true, slug: true },
+      orderBy: { position: "asc" },
+    });
+
+    // We also want to check if there are unbranded products with no category at all
+    const unbrandedProductsCount = await prisma.product.count({
+      where: {
+        brandId: null,
+        productType: type || undefined,
+        status: "ACTIVE"
+      }
+    });
+
+    if (unbrandedProductsCount > 0) {
+      const pseudoBrandName = type === "GLASSES" ? "Other Glasses" : type === "LENS" ? "Other Lenses" : "Other Products";
+      brands.push({
+        id: "unbranded",
+        name: pseudoBrandName,
+        slug: "unbranded",
+        logo: null,
+        categories: unbrandedCategories,
+      } as any);
+    }
+
     return NextResponse.json(brands);
   } catch (err) {
     console.error("[GET /api/store/brands]", err);

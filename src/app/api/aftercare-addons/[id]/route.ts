@@ -9,7 +9,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (authErr) return authErr;
   const { id } = await params;
   try {
-    const { name, extraCharge, retailPrice, description, active, image } = await req.json();
+    const { name, extraCharge, retailPrice, description, active, image, appliesTo } = await req.json();
 
     // If image is being replaced, delete the old one from Cloudinary
     if (image !== undefined) {
@@ -28,6 +28,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         ...(description !== undefined && { description: description?.trim() || null }),
         ...(active !== undefined && { active }),
         ...(image !== undefined && { image: image || null }),
+        ...(appliesTo !== undefined && { appliesTo }),
       },
     });
     return NextResponse.json(addon);

@@ -38,8 +38,9 @@ export async function GET(
       ...product,
       images: product.images ? (() => { try { return JSON.parse(product.images!); } catch { return []; } })() : [],
     };
+    const productAddons = addons.filter((a) => a.appliesTo === product.productType);
     const enriched = applyDiscountToProduct(parsed, activeDiscounts);
-    return NextResponse.json({ ...enriched, addons });
+    return NextResponse.json({ ...enriched, addons: productAddons });
   } catch (err) {
     console.error("[GET /api/store/products/[slug]]", err);
     return NextResponse.json({ error: "Failed to fetch product" }, { status: 500 });

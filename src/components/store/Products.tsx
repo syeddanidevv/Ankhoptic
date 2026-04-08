@@ -80,7 +80,6 @@ export default function Products() {
     THREE_YEAR_DISPOSABLE: "3-Year",
   };
 
-  const [brands, setBrands] = useState<Brand[]>([]);
   const [colors, setColors] = useState<string[]>([]);
   const [disposabilities, setDisposabilities] = useState<{label: string, value: string}[]>([]);
   const [localSearch, setLocalSearch] = useState(searchParam);
@@ -113,16 +112,31 @@ export default function Products() {
     setExpandedBrand(brandParam);
   }, [brandParam]);
 
+  const [lensBrands, setLensBrands] = useState<Brand[]>([]);
+  const [glassesBrands, setGlassesBrands] = useState<Brand[]>([]);
+
+  // Get combined brands to use for title derivation
+  const brands = [...lensBrands, ...glassesBrands];
+
   // ── Fetch metadata ──────────────────────────────────────────────────────────
   useEffect(() => {
-    // Filter brands by productType so lenses don't show glasses brands and vice versa
-    const brandUrl = productTypeParam
-      ? `/api/store/brands?type=${productTypeParam}`
-      : "/api/store/brands";
-    fetch(brandUrl)
-      .then((r) => r.json())
-      .then(setBrands)
-      .catch(() => {});
+    if (!productTypeParam || productTypeParam === "LENS") {
+      fetch("/api/store/brands?type=LENS")
+        .then((r) => r.json())
+        .then(setLensBrands)
+        .catch(() => {});
+    } else {
+      setLensBrands([]);
+    }
+
+    if (!productTypeParam || productTypeParam === "GLASSES") {
+      fetch("/api/store/brands?type=GLASSES")
+        .then((r) => r.json())
+        .then(setGlassesBrands)
+        .catch(() => {});
+    } else {
+      setGlassesBrands([]);
+    }
     fetch("/api/store/colors-modalities")
       .then((r) => r.json())
       .then((d) => {
@@ -197,6 +211,28 @@ export default function Products() {
   // ── Filter navigation helpers ───────────────────────────────────────────────
   const navigate = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString());
+
+    // Auto-clear incompatible filters when switching brands
+    if (key === "brand") {
+      params.delete("category"); // Different brand probably doesn't have the same category slug
+      
+      const isGlassesBrand = glassesBrands.some(b => b.slug === value);
+      const isLensBrand = lensBrands.some(b => b.slug === value);
+
+      if (isGlassesBrand && !isLensBrand) {
+        params.delete("disposability");
+        if (params.get("productType") === "LENS") params.delete("productType");
+      }
+      
+      if (isLensBrand && !isGlassesBrand) {
+        if (params.get("productType") === "GLASSES") params.delete("productType");
+      }
+    }
+
+    if (key === "productType" && value === "GLASSES") {
+      params.delete("disposability");
+    }
+
     if (value) params.set(key, value);
     else params.delete(key);
     params.delete("page");
@@ -232,11 +268,13 @@ export default function Products() {
 
   // Page title
   const isGlasses = productTypeParam === "GLASSES";
+  const isLenses = productTypeParam === "LENS";
 
-  let pageTitle = isGlasses ? "All Glasses" : "All Lenses";
-  if (brandParam)
-    pageTitle = `${brands.find((b) => b.slug === brandParam)?.name ?? brandParam} ${isGlasses ? "Glasses" : "Lenses"}`;
-  else if (colorParam) pageTitle = isGlasses ? `${colorParam} Glasses` : `${colorParam} Colored Lenses`;
+  let pageTitle = isGlasses ? "All Glasses" : (isLenses ? "All Lenses" : "All Products");
+  if (brandParam) {
+    const brandName = brands.find((b) => b.slug === brandParam)?.name ?? brandParam;
+    pageTitle = brandParam === "unbranded" ? brandName : `${brandName} ${isGlasses ? "Glasses" : (isLenses ? "Lenses" : "Products")}`;
+  } else if (colorParam) pageTitle = isGlasses ? `${colorParam} Glasses` : (isLenses ? `${colorParam} Colored Lenses` : `${colorParam} Products`);
   else if (disposabilityParam && !isGlasses) pageTitle = `${disposabilities.find(d => d.value === disposabilityParam)?.label || disposabilityParam} Lenses`;
   else if (categoryParam) pageTitle = categoryParam.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
   else if (tagParam === "deals") pageTitle = "Deals & Offers";
@@ -297,6 +335,62 @@ export default function Products() {
   );
 
   // ── Sidebar ─────────────────────────────────────────────────────────────────
+  const renderBrand = (brand: Brand) => {
+    const isExpanded = expandedBrand === brand.slug;
+    const isActive = brandParam === brand.slug;
+    return (
+      <li key={brand.id}>
+        <button
+          className={`sidebar-filter-btn brand-toggle ${isActive ? "active" : ""}`}
+          onClick={() => {
+            navigate("brand", brand.slug);
+            setExpandedBrand((prev) => (prev === brand.slug ? "" : brand.slug));
+          }}
+        >
+          {brand.logo && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={brand.logo} alt={brand.name} className="sidebar-brand-logo" />
+          )}
+          <span style={{ flex: 1 }}>{brand.name}</span>
+          {brand.categories.length > 0 && (
+            <span
+              className="brand-chevron"
+              style={{
+                transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)",
+              }}
+            >
+              ▾
+            </span>
+          )}
+        </button>
+        <div
+          className="sidebar-sub-wrap"
+          style={{
+            maxHeight:
+              isExpanded && brand.categories.length > 0
+                ? `${brand.categories.length * 40}px`
+                : "0px",
+          }}
+        >
+          <ul className="sidebar-sub-list">
+            {brand.categories.map((cat) => (
+              <li key={cat.id}>
+                <button
+                  className={`sidebar-filter-btn sub ${categoryParam === cat.slug ? "active" : ""}`}
+                  onClick={() =>
+                    navigate("category", categoryParam === cat.slug ? "" : cat.slug)
+                  }
+                >
+                  {cat.name}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </li>
+    );
+  };
+
   const Sidebar = () => (
     <div className="products-sidebar">
       {/* Search */}
@@ -323,75 +417,27 @@ export default function Products() {
                 All Brands
               </button>
             </li>
-            {brands.map((brand) => {
-              const isExpanded = expandedBrand === brand.slug;
-              const isActive = brandParam === brand.slug;
-              return (
-                <li key={brand.id}>
-                  <button
-                    className={`sidebar-filter-btn brand-toggle ${isActive ? "active" : ""}`}
-                    onClick={() => {
-                      // Navigate to brand filter
-                      navigate("brand", brand.slug);
-                      // Toggle accordion
-                      setExpandedBrand((prev) =>
-                        prev === brand.slug ? "" : brand.slug,
-                      );
-                    }}
-                  >
-                    {brand.logo && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={brand.logo}
-                        alt={brand.name}
-                        className="sidebar-brand-logo"
-                      />
-                    )}
-                    <span style={{ flex: 1 }}>{brand.name}</span>
-                    {brand.categories.length > 0 && (
-                      <span
-                        className="brand-chevron"
-                        style={{
-                          transform: isExpanded
-                            ? "rotate(180deg)"
-                            : "rotate(0deg)",
-                        }}
-                      >
-                        ▾
-                      </span>
-                    )}
-                  </button>
-                  {/* Smooth accordion for categories */}
-                  <div
-                    className="sidebar-sub-wrap"
-                    style={{
-                      maxHeight:
-                        isExpanded && brand.categories.length > 0
-                          ? `${brand.categories.length * 40}px`
-                          : "0px",
-                    }}
-                  >
-                    <ul className="sidebar-sub-list">
-                      {brand.categories.map((cat) => (
-                        <li key={cat.id}>
-                          <button
-                            className={`sidebar-filter-btn sub ${categoryParam === cat.slug ? "active" : ""}`}
-                            onClick={() =>
-                              navigate(
-                                "category",
-                                categoryParam === cat.slug ? "" : cat.slug,
-                              )
-                            }
-                          >
-                            {cat.name}
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </li>
-              );
-            })}
+            {lensBrands.length > 0 && (!productTypeParam || productTypeParam === "LENS") && (
+              <>
+                {!productTypeParam && (
+                  <li style={{ fontSize: "11px", fontWeight: 700, color: "#aaa", marginTop: "16px", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "1px" }}>
+                    Lenses
+                  </li>
+                )}
+                {lensBrands.map(renderBrand)}
+              </>
+            )}
+
+            {glassesBrands.length > 0 && (!productTypeParam || productTypeParam === "GLASSES") && (
+              <>
+                {!productTypeParam && (
+                  <li style={{ fontSize: "11px", fontWeight: 700, color: "#aaa", marginTop: "16px", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "1px" }}>
+                    Glasses
+                  </li>
+                )}
+                {glassesBrands.map(renderBrand)}
+              </>
+            )}
           </ul>
         </div>
       )}

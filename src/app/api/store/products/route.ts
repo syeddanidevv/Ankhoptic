@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
       ...(color        ? { color }                          : {}),
       ...(disposability? { disposability }                  : {}),
       ...(featured     ? { featured: true }                 : {}),
-      ...(brandSlug    ? { brand:    { slug: brandSlug    } }: {}),
+      ...(brandSlug === "unbranded" ? { brandId: null } : (brandSlug ? { brand: { slug: brandSlug } } : {})),
       ...(categorySlug ? { category: { slug: categorySlug } }: {}),
       ...(search ? {
         OR: [

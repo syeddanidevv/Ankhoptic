@@ -48,7 +48,7 @@ const productSchema = z.object({
     .refine((v) => !isNaN(Number(v)) && Number(v) >= 0, "Must be 0 or more"),
   slug: z.string().optional(),
   categoryId: z.string().min(1, "Category is required"),
-  brandId: z.string().min(1, "Brand is required"),
+  brandId: z.string().optional(),
   // Lens-specific — validated at runtime based on productType
   color: z.string().optional(),
   disposability: z.string().optional(),
@@ -201,6 +201,7 @@ function ProductForm() {
     }
     // Lens-specific required fields
     if (form.productType === "LENS") {
+      if (!form.brandId) errs.brandId = "Brand is required for lenses";
       if (!form.disposability)
         errs.disposability = "Disposability is required for lenses";
     }

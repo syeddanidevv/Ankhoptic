@@ -119,14 +119,15 @@ model ProductPowerOption {
 }
 
 model AftercareAddon {
-  id          String  @id @default(cuid())
+  id          String      @id @default(cuid())
   name        String
   extraCharge Float
   retailPrice Float
   description String?
-  image       String? @db.LongText
-  position    Int     @default(0)
-  active      Boolean @default(true)
+  image       String?     @db.LongText
+  position    Int         @default(0)
+  active      Boolean     @default(true)
+  appliesTo   ProductType @default(LENS)
 
   @@map("aftercare_addons")
 }

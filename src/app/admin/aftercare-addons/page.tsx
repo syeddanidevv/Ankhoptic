@@ -5,7 +5,7 @@ import {
 } from "@chakra-ui/react";
 import {
   T, PageHeader, StatCard, SectionCard, FormField,
-  InputField, FieldError, AdminButton, AdminModal, AdminLoader,
+  InputField, SelectField, FieldError, AdminButton, AdminModal, AdminLoader,
   TableShell, THead, TR, TD, EmptyRow,
 } from "@/components/admin/ui";
 import { ImageUpload } from "@/components/admin/ImageUpload";
@@ -20,6 +20,7 @@ interface Addon {
   image: string | null;
   position: number;
   active: boolean;
+  appliesTo: string;
 }
 
 interface FormState {
@@ -28,16 +29,18 @@ interface FormState {
   retailPrice: string;
   description: string;
   image: string;
+  appliesTo: string;
 }
-interface FormErrors { name?: string; extraCharge?: string; retailPrice?: string; }
+interface FormErrors { name?: string; extraCharge?: string; retailPrice?: string; appliesTo?: string; }
 
-const EMPTY: FormState = { name: "", extraCharge: "", retailPrice: "", description: "", image: "" };
+const EMPTY: FormState = { name: "", extraCharge: "", retailPrice: "", description: "", image: "", appliesTo: "" };
 
 function validate(f: FormState): FormErrors {
   const e: FormErrors = {};
   if (!f.name.trim()) e.name = "Name is required";
   if (!f.extraCharge || isNaN(Number(f.extraCharge))) e.extraCharge = "Valid amount required";
   if (!f.retailPrice || isNaN(Number(f.retailPrice))) e.retailPrice = "Valid price required";
+  if (!f.appliesTo) e.appliesTo = "Please select what this applies to";
   return e;
 }
 
@@ -83,7 +86,8 @@ export default function AftercarePage() {
       extraCharge: a.extraCharge.toString(), 
       retailPrice: a.retailPrice.toString(), 
       description: a.description ?? "", 
-      image: a.image ?? "" 
+      image: a.image ?? "",
+      appliesTo: a.appliesTo ?? ""
     });
     setErrors({});
     setPendingFile(null);
@@ -194,7 +198,7 @@ export default function AftercarePage() {
 
       <SectionCard title="All Aftercare Add-ons" subtitle="Toggle active/inactive or edit details">
         <TableShell showPagination={false}>
-          <THead columns={["Image", "Name", "Extra Charge", "Retail Price", "Description", "Status", "Actions"]} />
+          <THead columns={["Image", "Name", "For", "Extra Charge", "Retail Price", "Description", "Status", "Actions"]} />
           <tbody>
             {addons.length === 0 && <EmptyRow cols={7} message="No aftercare addons yet — add one above." />}
             {addons.map((a, i) => (
@@ -212,6 +216,11 @@ export default function AftercarePage() {
                 </TD>
                 <TD>
                   <Text fontSize="13.5px" fontWeight={600} color={T.text}>{a.name}</Text>
+                </TD>
+                <TD>
+                  <Box bg={T.bg} px={2} py={1} borderRadius="6px" display="inline-block">
+                    <Text fontSize="12px" fontWeight={600} color={T.sub}>{a.appliesTo}</Text>
+                  </Box>
                 </TD>
                 <TD>
                   <Text fontSize="13px" color={T.text}>Rs {a.extraCharge.toLocaleString()}</Text>
@@ -274,6 +283,20 @@ export default function AftercarePage() {
               isInvalid={!!errors.name}
             />
             <FieldError msg={errors.name} />
+          </FormField>
+
+          <FormField label="Applies To" required>
+            <SelectField
+              placeholder="Select type"
+              value={form.appliesTo}
+              onChange={(e) => setObj("appliesTo", e.target.value)}
+              options={[
+                { value: "LENS", label: "Lenses" },
+                { value: "GLASSES", label: "Glasses" }
+              ]}
+              isInvalid={!!errors.appliesTo}
+            />
+            <FieldError msg={errors.appliesTo} />
           </FormField>
 
           <Flex gap={3}>
